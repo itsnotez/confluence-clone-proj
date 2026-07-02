@@ -5,7 +5,10 @@
       <SpaceSidebar :space-key="spaceKey" />
       <main class="main-content">
         <div v-if="spaceStore.currentSpace" class="space-info">
-          <h2>{{ spaceStore.currentSpace.name }}</h2>
+          <div class="space-title-row">
+            <h2>{{ spaceStore.currentSpace.name }}</h2>
+            <RouterLink :to="`/spaces/${spaceKey}/permissions`" class="perm-link">권한 설정</RouterLink>
+          </div>
           <p v-if="spaceStore.currentSpace.description" class="space-desc">
             {{ spaceStore.currentSpace.description }}
           </p>
@@ -31,7 +34,7 @@
 
 <script setup>
 import { computed, onMounted, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute, useRouter, RouterLink } from 'vue-router'
 import { useSpaceStore } from '@/stores/space'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import SpaceSidebar from '@/components/layout/SpaceSidebar.vue'
@@ -94,5 +97,19 @@ function onContentClick(e) {
   font-size: 16px;
   color: #444;
   margin-bottom: 12px;
+}
+.space-title-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 4px;
+}
+.perm-link {
+  font-size: 13px;
+  color: #1976d2;
+  text-decoration: none;
+}
+.perm-link:hover {
+  text-decoration: underline;
 }
 </style>

@@ -9,6 +9,7 @@ const routes = [
   { path: '/spaces/:spaceKey/contents/:contentId', component: () => import('@/views/content/ContentView.vue') },
   { path: '/spaces/:spaceKey/contents/new', component: () => import('@/views/content/ContentEditorView.vue') },
   { path: '/spaces/:spaceKey/contents/:contentId/edit', component: () => import('@/views/content/ContentEditorView.vue') },
+  { path: '/spaces/:spaceKey/permissions', component: () => import('@/views/space/SpacePermissionView.vue') },
   { path: '/search', component: () => import('@/views/search/SearchResultView.vue') },
   { path: '/admin', component: () => import('@/views/admin/AdminDashboardView.vue') }
 ]

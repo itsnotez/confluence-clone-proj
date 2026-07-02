@@ -16,7 +16,9 @@ public enum ErrorCode {
 
     DUPLICATE_SPACE_KEY(HttpStatus.CONFLICT, "이미 사용 중인 Space Key입니다."),
     DUPLICATE_LOGIN_ID(HttpStatus.CONFLICT, "이미 사용 중인 로그인 ID입니다."),
+    DUPLICATE_EMAIL(HttpStatus.CONFLICT, "이미 사용 중인 이메일입니다."),
     ARCHIVED_SPACE(HttpStatus.BAD_REQUEST, "보관된 Space는 수정할 수 없습니다."),
+    GROUP_NOT_FOUND(HttpStatus.NOT_FOUND, "그룹을 찾을 수 없습니다."),
 
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류가 발생했습니다.");
 

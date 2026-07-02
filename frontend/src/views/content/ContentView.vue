@@ -44,6 +44,10 @@
         <div v-else class="empty-state">
           <p>콘텐츠를 불러올 수 없습니다.</p>
         </div>
+        <VersionHistoryPanel
+          v-model:visible="showVersionHistory"
+          :content-id="contentStore.currentContent?.id"
+        />
       </main>
     </div>
   </div>
@@ -56,6 +60,7 @@ import { useContentStore } from '@/stores/content'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import SpaceSidebar from '@/components/layout/SpaceSidebar.vue'
 import TipTapEditor from '@/components/content/TipTapEditor.vue'
+import VersionHistoryPanel from '@/components/content/VersionHistoryPanel.vue'
 import { DxButton } from 'devextreme-vue/button'
 import { DxLoadIndicator } from 'devextreme-vue/load-indicator'
 

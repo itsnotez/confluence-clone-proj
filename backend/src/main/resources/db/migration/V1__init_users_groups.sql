@@ -30,4 +30,4 @@ CREATE INDEX idx_group_members_user ON group_members(user_id);
 -- 초기 Site Admin 계정 (비밀번호: Admin1234! → bcrypt)
 INSERT INTO users (login_id, name, email, password, role)
 VALUES ('admin', 'Site Admin', 'admin@company.com',
-        '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'SITE_ADMIN');
+        '$2a$10$emFjSKuytOxWelbOlkasgu5sxib.AUTQ4OlorXsYp.4zTRzf8bLXO', 'SITE_ADMIN');

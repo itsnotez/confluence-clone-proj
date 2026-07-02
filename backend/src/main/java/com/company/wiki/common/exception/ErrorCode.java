@@ -20,6 +20,8 @@ public enum ErrorCode {
     ARCHIVED_SPACE(HttpStatus.BAD_REQUEST, "보관된 Space는 수정할 수 없습니다."),
     GROUP_NOT_FOUND(HttpStatus.NOT_FOUND, "그룹을 찾을 수 없습니다."),
 
+    PERMISSION_DENIED(HttpStatus.FORBIDDEN, "해당 콘텐츠에 대한 권한이 없습니다."),
+
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류가 발생했습니다.");
 
     private final HttpStatus status;

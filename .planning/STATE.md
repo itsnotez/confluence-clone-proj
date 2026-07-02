@@ -54,6 +54,8 @@ Progress: [████░░░░░░] 43%
 - [Phase 0]: Vite 5 고정 (ARM64 rolldown 버그)
 - [Phase 0]: 테스트는 실제 PostgreSQL Docker 사용 (H2 금지)
 - [Phase 0]: admin 비밀번호 Admin1234! (bcrypt: $2a$10$emFjSKuytOxWelbOlkasgu5sxib.AUTQ4OlorXsYp.4zTRzf8bLXO)
+- [Phase 1-01]: @PreAuthorize에서 hasAuthority('ROLE_SITE_ADMIN') 사용 (UserDetailsServiceImpl이 ROLE_ 접두사 부여)
+- [Phase 1-01]: GroupMemberId를 정적 내부 @Embeddable 클래스로 정의
 
 ### Pending Todos
 
@@ -71,6 +73,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-07-02T12:40:44.300Z
-Stopped at: Phase 0 완료, Phase 1 실행 시작 전
+Last session: 2026-07-02T21:41:00.000Z
+Stopped at: Phase 01 Plan 01 완료 — User/Group CRUD API 구현 (테스트 9개 통과)
 Resume file: None

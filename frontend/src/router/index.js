@@ -7,6 +7,7 @@ const routes = [
   { path: '/spaces', component: () => import('@/views/space/SpaceListView.vue') },
   { path: '/spaces/:spaceKey', component: () => import('@/views/space/SpaceHomeView.vue') },
   { path: '/spaces/:spaceKey/contents/:contentId', component: () => import('@/views/content/ContentView.vue') },
+  { path: '/spaces/:spaceKey/contents/new', component: () => import('@/views/content/ContentEditorView.vue') },
   { path: '/spaces/:spaceKey/contents/:contentId/edit', component: () => import('@/views/content/ContentEditorView.vue') },
   { path: '/search', component: () => import('@/views/search/SearchResultView.vue') },
   { path: '/admin', component: () => import('@/views/admin/AdminDashboardView.vue') }

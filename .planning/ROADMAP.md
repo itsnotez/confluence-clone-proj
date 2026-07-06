@@ -79,9 +79,22 @@ Wave 4 *(blocked on Wave 3 completion)*:
 - [x] 03-06: 댓글·첨부파일 프론트엔드 — CommentPanel + AttachmentPanel + ContentView 통합
 
 ### Phase 4: 관리자 대시보드·알림·감사로그
-**Goal**: 운영 도구 및 모니터링
+**Goal**: 운영 도구 및 모니터링 — Site Admin 대시보드, In-app 알림, 감사로그
 **Depends on**: Phase 3
-**Plans**: TBD
+**Requirements**: ADMIN-01, ADMIN-02, NOTIF-01, NOTIF-02, AUDIT-01, AUDIT-02
+**Plans**: 6 plans
+
+Wave 1 *(독립 실행 가능)*:
+- [ ] 04-01-PLAN.md — 감사로그 백엔드 (AuditLog entity/repository/service + PermissionService/SpaceService/MailAccountService 통합)
+- [ ] 04-02-PLAN.md — 알림 백엔드 (Notification entity/repository/service + CommentService 통합)
+
+Wave 2 *(blocked on Wave 1 completion)*:
+- [ ] 04-03-PLAN.md — 관리자 통계 API (AdminStatsService + AdminController: GET /admin/stats, GET /admin/audit-logs)
+- [ ] 04-04-PLAN.md — 알림 조회/읽음처리 API (NotificationController: GET /notifications, PATCH read/read-all)
+
+Wave 3 *(blocked on Wave 2 completion)*:
+- [ ] 04-05-PLAN.md — 관리자 대시보드 프론트엔드 (AdminDashboardView.vue: DxTabPanel + DxChart + DxDataGrid)
+- [ ] 04-06-PLAN.md — 알림 프론트엔드 (AppHeader 알림 벨 + 드롭다운 + Pinia 스토어 폴링)
 
 ### Phase 5: 성능·보안·UAT
 **Goal**: P95 < 500ms + XSS/SQL Injection 방어 + UAT
@@ -96,5 +109,5 @@ Wave 4 *(blocked on Wave 3 completion)*:
 | 1. 핵심 기능 | 7/7 | Complete | 2026-07-06 |
 | 2. 메일 연동 | 4/4 | Complete | 2026-07-06 |
 | 3. 검색·첨부 | 6/6 | Complete   | 2026-07-06 |
-| 4. 관리자·알림 | TBD | Not started | - |
+| 4. 관리자·알림 | 0/6 | Not started | - |
 | 5. 성능·UAT | TBD | Not started | - |

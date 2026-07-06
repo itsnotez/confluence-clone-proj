@@ -6,6 +6,7 @@ import com.company.wiki.content.dto.ContentDto;
 import com.company.wiki.content.entity.Content;
 import com.company.wiki.content.entity.ContentVersion;
 import com.company.wiki.content.repository.ContentRepository;
+import com.company.wiki.content.repository.ContentSearchBodyRepository;
 import com.company.wiki.content.repository.ContentVersionRepository;
 import com.company.wiki.permission.service.PermissionService;
 import com.company.wiki.space.entity.Space;
@@ -28,6 +29,7 @@ public class ContentService {
 
     private final ContentRepository contentRepository;
     private final ContentVersionRepository contentVersionRepository;
+    private final ContentSearchBodyRepository contentSearchBodyRepository;
     private final SpaceRepository spaceRepository;
     private final UserRepository userRepository;
     private final PermissionService permissionService;
@@ -148,6 +150,7 @@ public class ContentService {
             content.setCurrentVersionId(version.getId());
             content = contentRepository.save(content);
             body = version.getBody();
+            contentSearchBodyRepository.upsertSearchBody(content.getId(), body);
         }
 
         return toResponse(content, body);
@@ -192,6 +195,7 @@ public class ContentService {
                 content.setCurrentVersionId(version.getId());
                 body = version.getBody();
             }
+            contentSearchBodyRepository.upsertSearchBody(content.getId(), body);
         }
 
         content = contentRepository.save(content);
@@ -226,6 +230,7 @@ public class ContentService {
         content.setCurrentVersionId(version.getId());
         content.setStatus("PUBLISHED");
         content = contentRepository.save(content);
+        contentSearchBodyRepository.upsertSearchBody(contentId, req.getBody());
 
         return toResponse(content, version.getBody());
     }

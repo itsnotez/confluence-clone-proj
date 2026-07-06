@@ -40,6 +40,32 @@
             :model-value="contentStore.currentContent.body"
             :readonly="true"
           />
+          <div class="label-panel">
+            <p class="label-title">라벨</p>
+            <div v-if="labels.length === 0" class="label-empty">라벨 없음</div>
+            <div v-else class="label-chips">
+              <span
+                v-for="lb in labels"
+                :key="lb.id"
+                class="label-chip"
+                :style="lb.color ? { background: lb.color + '22', borderColor: lb.color } : {}"
+              >
+                {{ lb.name }}
+                <button class="chip-remove" @click="removeLabel(lb.id)">×</button>
+              </span>
+            </div>
+            <div class="label-add">
+              <DxSelectBox
+                :items="spaceLabels"
+                display-expr="name"
+                value-expr="id"
+                v-model:value="selectedLabelId"
+                placeholder="라벨 선택"
+                :width="200"
+              />
+              <DxButton text="추가" type="default" @click="addLabel" />
+            </div>
+          </div>
         </div>
         <div v-else class="empty-state">
           <p>콘텐츠를 불러올 수 없습니다.</p>
@@ -54,7 +80,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useContentStore } from '@/stores/content'
 import AppHeader from '@/components/layout/AppHeader.vue'
@@ -63,6 +89,8 @@ import TipTapEditor from '@/components/content/TipTapEditor.vue'
 import VersionHistoryPanel from '@/components/content/VersionHistoryPanel.vue'
 import { DxButton } from 'devextreme-vue/button'
 import { DxLoadIndicator } from 'devextreme-vue/load-indicator'
+import { DxSelectBox } from 'devextreme-vue/select-box'
+import { labelApi } from '@/api/label'
 
 const route = useRoute()
 const router = useRouter()
@@ -73,9 +101,59 @@ const contentId = route.params.contentId
 const loading = ref(true)
 const showVersionHistory = ref(false)
 
+// Label state
+const labels = ref([])
+const spaceLabels = ref([])
+const selectedLabelId = ref(null)
+
+const cid = computed(() => contentStore.currentContent?.id)
+const sid = computed(() => contentStore.currentContent?.spaceId)
+
+async function loadLabels() {
+  if (!cid.value) return
+  try {
+    const res = await labelApi.getByContent(cid.value)
+    labels.value = res.data.data || []
+  } catch (err) {
+    console.error('라벨 조회 실패:', err)
+  }
+}
+
+async function loadSpaceLabels() {
+  if (!sid.value) return
+  try {
+    const res = await labelApi.listBySpace(sid.value)
+    spaceLabels.value = res.data.data || []
+  } catch (err) {
+    console.error('스페이스 라벨 조회 실패:', err)
+  }
+}
+
+async function addLabel() {
+  if (!selectedLabelId.value) return
+  try {
+    await labelApi.add(cid.value, selectedLabelId.value)
+    selectedLabelId.value = null
+    await loadLabels()
+  } catch (err) {
+    console.error('라벨 추가 실패:', err)
+  }
+}
+
+async function removeLabel(labelId) {
+  try {
+    await labelApi.remove(cid.value, labelId)
+    await loadLabels()
+  } catch (err) {
+    console.error('라벨 제거 실패:', err)
+  }
+}
+
 onMounted(async () => {
   await contentStore.fetchContent(contentId)
   loading.value = false
+  await loadLabels()
+  await loadSpaceLabels()
 })
 
 function goEdit() {
@@ -161,5 +239,55 @@ function formatDate(dateStr) {
   color: #999;
   margin-top: 80px;
   font-size: 15px;
+}
+.label-panel {
+  margin-top: 24px;
+  border-top: 1px solid #eee;
+  padding-top: 16px;
+}
+.label-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #444;
+  margin: 0 0 8px 0;
+}
+.label-empty {
+  font-size: 13px;
+  color: #aaa;
+  margin-bottom: 12px;
+}
+.label-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.label-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border-radius: 12px;
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  font-size: 13px;
+  color: #3730a3;
+}
+.chip-remove {
+  cursor: pointer;
+  color: #888;
+  background: none;
+  border: none;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0 0 0 2px;
+}
+.chip-remove:hover {
+  color: #e53e3e;
+}
+.label-add {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 </style>

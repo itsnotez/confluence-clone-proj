@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v0.3.0
 milestone_name: milestone
-status: verifying
-stopped_at: Phase 02-04 완료 — 메일함 프론트엔드 (4/4 태스크 완료, 빌드 성공)
-last_updated: "2026-07-06T21:39:35.896Z"
-last_activity: 2026-07-06
+status: in_progress
+stopped_at: Phase 03-02 완료 — 라벨 백엔드 (3/3 태스크 완료, 테스트 3/3 GREEN)
+last_updated: "2026-07-07T06:45:00.000Z"
+last_activity: 2026-07-07
 progress:
   total_phases: 6
   completed_phases: 2
   total_plans: 17
-  completed_plans: 12
-  percent: 33
+  completed_plans: 13
+  percent: 76
 ---
 
 # Project State
@@ -70,6 +70,8 @@ Progress: [███████░░░] 71%
 - [Phase 2-03]: 메일→페이지 변환은 SPACE_ADMIN 권한 필요 (단순 조회는 READ 이상)
 - [Phase 2-04]: mail API named export 방식 (mailAccountApi, mailMessageApi) — space.js default export와 다름
 - [Phase 2-04]: fromAddress, bodyPreview 필드 사용 (백엔드 MailMessageDto 응답 필드명과 일치)
+- [Phase 3-02]: ContentLabelId를 @Embeddable record로 구현 (SpaceFavoriteId 패턴 동일)
+- [Phase 3-02]: getLabels에서 @Transactional(readOnly=true) 제거 — 같은 트랜잭션 내 flush 보장
 
 ### Pending Todos
 

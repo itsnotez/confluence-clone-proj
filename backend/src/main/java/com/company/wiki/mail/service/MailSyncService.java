@@ -1,0 +1,80 @@
+package com.company.wiki.mail.service;
+
+import com.company.wiki.mail.entity.MailAccount;
+import com.company.wiki.mail.entity.MailMessage;
+import com.company.wiki.mail.repository.MailAccountRepository;
+import com.company.wiki.mail.repository.MailMessageRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class MailSyncService {
+
+    private final ImapService imapService;
+    private final MailAccountRepository mailAccountRepository;
+    private final MailMessageRepository mailMessageRepository;
+
+    /**
+     * 단일 메일 계정의 신규 메시지를 동기화한다.
+     * 3회 연속 실패 시 syncStatus를 DISABLED로 변경한다.
+     *
+     * @param account 동기화할 메일 계정
+     */
+    @Transactional
+    public void syncAccount(MailAccount account) {
+        if ("DISABLED".equals(account.getSyncStatus())) {
+            log.info("계정 {} 은 DISABLED 상태 — 동기화 건너뜀", account.getEmailAddress());
+            return;
+        }
+
+        int retries = 0;
+        while (retries < 3) {
+            try {
+                List<MailMessage> fetched = imapService.fetchNewMessages(account, 50);
+                int saved = 0;
+                for (MailMessage msg : fetched) {
+                    if (!mailMessageRepository.existsByMailAccountIdAndMessageUid(
+                            account.getId(), msg.getMessageUid())) {
+                        mailMessageRepository.save(msg);
+                        saved++;
+                    }
+                }
+                account.setSyncStatus("ACTIVE");
+                account.setLastSyncedAt(LocalDateTime.now());
+                mailAccountRepository.save(account);
+                log.info("계정 {} 동기화 완료: {}건 저장", account.getEmailAddress(), saved);
+                return;
+            } catch (Exception e) {
+                retries++;
+                log.error("동기화 실패 ({}/3) — 계정: {}, 오류: {}",
+                        retries, account.getEmailAddress(), e.getMessage());
+                if (retries >= 3) {
+                    account.setSyncStatus("DISABLED");
+                } else {
+                    account.setSyncStatus("ERROR");
+                }
+                mailAccountRepository.save(account);
+            }
+        }
+    }
+
+    /**
+     * ACTIVE, PENDING, ERROR 상태의 모든 메일 계정을 동기화한다.
+     */
+    public void syncAll() {
+        List<MailAccount> targets = new ArrayList<>();
+        targets.addAll(mailAccountRepository.findBySyncStatus("ACTIVE"));
+        targets.addAll(mailAccountRepository.findBySyncStatus("PENDING"));
+        targets.addAll(mailAccountRepository.findBySyncStatus("ERROR"));
+        log.info("동기화 대상 계정: {}개", targets.size());
+        targets.forEach(this::syncAccount);
+    }
+}

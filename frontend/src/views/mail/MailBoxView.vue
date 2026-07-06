@@ -36,7 +36,7 @@
             >
               <DxSelection mode="single" />
               <DxColumn data-field="subject" caption="제목" />
-              <DxColumn data-field="fromAddress" caption="발신자" :width="200" />
+              <DxColumn data-field="sender" caption="발신자" :width="200" />
               <DxColumn data-field="receivedAt" caption="수신일" data-type="datetime" :width="160" />
               <DxColumn data-field="status" caption="상태" :width="90" cell-template="statusTemplate" />
               <template #statusTemplate="{ data }">
@@ -55,7 +55,7 @@
               <DxButton icon="close" styling-mode="text" @click="showPreview = false" />
             </div>
             <div class="preview-meta">
-              <p><strong>발신:</strong> {{ mailStore.selectedMessage.fromAddress }}</p>
+              <p><strong>발신:</strong> {{ mailStore.selectedMessage.sender }}</p>
               <p><strong>수신:</strong> {{ formatDate(mailStore.selectedMessage.receivedAt) }}</p>
             </div>
             <hr style="border:none;border-top:1px solid #e0e0e0;margin:12px 0" />

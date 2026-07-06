@@ -54,6 +54,7 @@ Plans:
 Plans:
 - [x] 02-01: 메일 계정 CRUD API + AES-256 자격증명 암호화 (백엔드)
 - [x] 02-02: IMAP Polling 메일 동기화 서비스 (MailMessage + ImapService + MailSyncService + MailPollingScheduler)
+- [x] 02-03: 메일 메시지 조회 + 페이지 변환 API (MailMessageDto + MailMessageService + MailMessageController)
 
 ### Phase 3: 검색·라벨·댓글·첨부파일
 **Goal**: PostgreSQL tsvector 전문검색 + 파일 관리
@@ -76,7 +77,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 0. 기반 구축 | 8/8 | Complete | 2026-07-01 |
 | 1. 핵심 기능 | 7/7 | Complete | 2026-07-06 |
-| 2. 메일 연동 | 2/TBD | In Progress | - |
+| 2. 메일 연동 | 3/TBD | In Progress | - |
 | 3. 검색·첨부 | TBD | Not started | - |
 | 4. 관리자·알림 | TBD | Not started | - |
 | 5. 성능·UAT | TBD | Not started | - |

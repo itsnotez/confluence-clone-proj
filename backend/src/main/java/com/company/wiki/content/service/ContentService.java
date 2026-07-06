@@ -11,6 +11,7 @@ import com.company.wiki.permission.service.PermissionService;
 import com.company.wiki.space.entity.Space;
 import com.company.wiki.space.repository.SpaceRepository;
 import com.company.wiki.user.entity.User;
+import com.company.wiki.user.repository.GroupMemberRepository;
 import com.company.wiki.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,13 @@ public class ContentService {
     private final SpaceRepository spaceRepository;
     private final UserRepository userRepository;
     private final PermissionService permissionService;
+    private final GroupMemberRepository groupMemberRepository;
+
+    private List<Long> getUserGroupIds(Long userId) {
+        return groupMemberRepository.findByUserId(userId).stream()
+                .map(gm -> gm.getId().getGroupId())
+                .collect(Collectors.toList());
+    }
 
     // -------------------------------------------------------
     // 트리 조회
@@ -39,7 +47,7 @@ public class ContentService {
         Space space = spaceRepository.findBySpaceKeyAndDeletedAtIsNull(spaceKey)
                 .orElseThrow(() -> new BusinessException(ErrorCode.SPACE_NOT_FOUND));
 
-        if (!permissionService.canRead(space.getId(), currentUserId, userRole, List.of())) {
+        if (!permissionService.canRead(space.getId(), currentUserId, userRole, getUserGroupIds(currentUserId))) {
             throw new BusinessException(ErrorCode.PERMISSION_DENIED);
         }
 
@@ -88,7 +96,7 @@ public class ContentService {
         Content content = contentRepository.findByIdAndDeletedAtIsNull(contentId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.CONTENT_NOT_FOUND));
 
-        if (!permissionService.canRead(content.getSpaceId(), currentUserId, userRole, List.of())) {
+        if (!permissionService.canRead(content.getSpaceId(), currentUserId, userRole, getUserGroupIds(currentUserId))) {
             throw new BusinessException(ErrorCode.PERMISSION_DENIED);
         }
 
@@ -109,7 +117,7 @@ public class ContentService {
         Space space = spaceRepository.findBySpaceKeyAndDeletedAtIsNull(spaceKey)
                 .orElseThrow(() -> new BusinessException(ErrorCode.SPACE_NOT_FOUND));
 
-        if (!permissionService.canWrite(space.getId(), createdById, userRole, List.of())) {
+        if (!permissionService.canWrite(space.getId(), createdById, userRole, getUserGroupIds(createdById))) {
             throw new BusinessException(ErrorCode.PERMISSION_DENIED);
         }
 
@@ -153,7 +161,7 @@ public class ContentService {
         Content content = contentRepository.findByIdAndDeletedAtIsNull(contentId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.CONTENT_NOT_FOUND));
 
-        if (!permissionService.canWrite(content.getSpaceId(), userId, userRole, List.of())) {
+        if (!permissionService.canWrite(content.getSpaceId(), userId, userRole, getUserGroupIds(userId))) {
             throw new BusinessException(ErrorCode.PERMISSION_DENIED);
         }
 
@@ -198,7 +206,7 @@ public class ContentService {
         Content content = contentRepository.findByIdAndDeletedAtIsNull(contentId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.CONTENT_NOT_FOUND));
 
-        if (!permissionService.canWrite(content.getSpaceId(), userId, userRole, List.of())) {
+        if (!permissionService.canWrite(content.getSpaceId(), userId, userRole, getUserGroupIds(userId))) {
             throw new BusinessException(ErrorCode.PERMISSION_DENIED);
         }
 
@@ -229,7 +237,7 @@ public class ContentService {
         Content content = contentRepository.findByIdAndDeletedAtIsNull(contentId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.CONTENT_NOT_FOUND));
 
-        if (!permissionService.canWrite(content.getSpaceId(), userId, userRole, List.of())) {
+        if (!permissionService.canWrite(content.getSpaceId(), userId, userRole, getUserGroupIds(userId))) {
             throw new BusinessException(ErrorCode.PERMISSION_DENIED);
         }
 
@@ -246,7 +254,7 @@ public class ContentService {
         Content content = contentRepository.findByIdAndDeletedAtIsNull(contentId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.CONTENT_NOT_FOUND));
 
-        if (!permissionService.canRead(content.getSpaceId(), userId, userRole, List.of())) {
+        if (!permissionService.canRead(content.getSpaceId(), userId, userRole, getUserGroupIds(userId))) {
             throw new BusinessException(ErrorCode.PERMISSION_DENIED);
         }
 

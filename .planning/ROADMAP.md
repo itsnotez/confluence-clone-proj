@@ -46,8 +46,13 @@ Plans:
 
 ### Phase 2: 메일 서버 연동
 **Goal**: IMAP Polling 기반 메일 동기화 및 메일함 UI
+**Status**: In Progress (2026-07-06)
 **Depends on**: Phase 1
+**Requirements**: REQ-MAIL-ACCOUNT
 **Plans**: TBD
+
+Plans:
+- [x] 02-01: 메일 계정 CRUD API + AES-256 자격증명 암호화 (백엔드)
 
 ### Phase 3: 검색·라벨·댓글·첨부파일
 **Goal**: PostgreSQL tsvector 전문검색 + 파일 관리
@@ -70,7 +75,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 0. 기반 구축 | 8/8 | Complete | 2026-07-01 |
 | 1. 핵심 기능 | 7/7 | Complete | 2026-07-06 |
-| 2. 메일 연동 | TBD | Not started | - |
+| 2. 메일 연동 | 1/TBD | In Progress | - |
 | 3. 검색·첨부 | TBD | Not started | - |
 | 4. 관리자·알림 | TBD | Not started | - |
 | 5. 성능·UAT | TBD | Not started | - |

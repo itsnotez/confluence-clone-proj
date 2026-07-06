@@ -3,6 +3,10 @@ spring:
     active: local
   application:
     name: wiki
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
   datasource:
     url: jdbc:postgresql://localhost:5432/wikidb
     username: wikiuser

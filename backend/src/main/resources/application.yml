@@ -37,6 +37,10 @@ storage:
     bucket: wiki-attachments
     region: us-east-1
 
+aes:
+  secret-key: ${AES_SECRET_KEY:WikiAesKey256BitSecretKey12345678}
+  iv: ${AES_IV:WikiAesIV16Bytes!}
+
 server:
   port: 8080
   servlet:

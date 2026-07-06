@@ -13,6 +13,8 @@ public enum ErrorCode {
     SPACE_NOT_FOUND(HttpStatus.NOT_FOUND, "Space를 찾을 수 없습니다."),
     CONTENT_NOT_FOUND(HttpStatus.NOT_FOUND, "콘텐츠를 찾을 수 없습니다."),
     MAIL_ACCOUNT_NOT_FOUND(HttpStatus.NOT_FOUND, "메일 계정을 찾을 수 없습니다."),
+    MAIL_MESSAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "메일 메시지를 찾을 수 없습니다."),
+    ALREADY_CONVERTED(HttpStatus.CONFLICT, "이미 페이지로 변환된 메일입니다."),
 
     DUPLICATE_SPACE_KEY(HttpStatus.CONFLICT, "이미 사용 중인 Space Key입니다."),
     DUPLICATE_LOGIN_ID(HttpStatus.CONFLICT, "이미 사용 중인 로그인 ID입니다."),

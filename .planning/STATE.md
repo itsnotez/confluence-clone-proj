@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v0.3.0
 milestone_name: milestone
 status: in_progress
-stopped_at: "Phase 02-03 완료 (메일 메시지 조회 + 페이지 변환 API)"
-last_updated: "2026-07-06T22:05:00.000Z"
+stopped_at: "Phase 02-04 완료 (메일함 프론트엔드 — MailBoxView.vue + mail API + store + 라우터)"
+last_updated: "2026-07-06T22:25:00.000Z"
 last_activity: 2026-07-06
 progress:
   total_phases: 6
   completed_phases: 1
   total_plans: 9
-  completed_plans: 9
-  percent: 38
+  completed_plans: 10
+  percent: 42
 ---
 
 # Project State
@@ -21,24 +21,24 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-02)
 
 **Core value:** Space·콘텐츠 CRUD와 RBAC 권한 제어가 올바르게 동작해야 한다
-**Current focus:** Phase 2 진행 중 — 메일 서버 연동 (02-03 완료: 메일 메시지 조회 + 페이지 변환 API)
+**Current focus:** Phase 2 완료 — 메일 서버 연동 4/4 플랜 완료 (02-04: 메일함 프론트엔드)
 
 ## Current Position
 
-Phase: 2 진행 중 (메일 서버 연동)
-Plan: 3 of TBD in Phase 2 — 02-03 COMPLETE
-Status: In Progress
+Phase: 2 완료 → Phase 3 대기
+Plan: 4 of 4 in Phase 2 — 02-04 COMPLETE
+Status: Phase 2 Complete
 Last activity: 2026-07-06
 
-Progress: [████████░░] Phase 2 시작
+Progress: [████████░░] Phase 2 완료
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 10 (Phase 1: 7, Phase 2: 3)
+- Total plans completed: 11 (Phase 1: 7, Phase 2: 4)
 - Average duration: ~15분/plan
-- Total execution time: ~154분
+- Total execution time: ~169분
 
 **By Phase:**
 
@@ -46,7 +46,7 @@ Progress: [████████░░] Phase 2 시작
 |-------|-------|-------|----------|
 | 0 | 8 | - | - |
 | 1 | 7 | ~100분 | ~14분 |
-| 2 (진행중) | 3 | ~41분 | ~14분 |
+| 2 (완료) | 4 | ~55분 | ~14분 |
 
 ## Accumulated Context
 
@@ -67,6 +67,8 @@ Progress: [████████░░] Phase 2 시작
 - [Phase 2-02]: MailPollingScheduler fixedDelay=300000 (완료 후 5분 대기, 동시 실행 방지)
 - [Phase 2-03]: Content.createdBy는 User 엔티티 참조 — MailMessageService에 UserRepository 주입하여 User 객체 조회 후 설정
 - [Phase 2-03]: 메일→페이지 변환은 SPACE_ADMIN 권한 필요 (단순 조회는 READ 이상)
+- [Phase 2-04]: mail API named export 방식 (mailAccountApi, mailMessageApi) — space.js default export와 다름
+- [Phase 2-04]: fromAddress, bodyPreview 필드 사용 (백엔드 MailMessageDto 응답 필드명과 일치)
 
 ### Pending Todos
 
@@ -84,6 +86,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-07-06T22:05:00.000Z
-Stopped at: Phase 02-03 완료 — 메일 메시지 조회 + 페이지 변환 API (4/4 통합 테스트 통과)
+Last session: 2026-07-06T22:25:00.000Z
+Stopped at: Phase 02-04 완료 — 메일함 프론트엔드 (4/4 태스크 완료, 빌드 성공)
 Resume file: None

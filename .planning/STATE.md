@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v0.3.0
 milestone_name: milestone
 status: in_progress
-stopped_at: "Phase 02-01 완료 (메일 계정 CRUD + AES-256 암호화)"
-last_updated: "2026-07-06T12:17:00.000Z"
+stopped_at: "Phase 02-02 완료 (IMAP 메일 동기화 서비스)"
+last_updated: "2026-07-06T12:35:00.000Z"
 last_activity: 2026-07-06
 progress:
   total_phases: 6
@@ -21,12 +21,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-02)
 
 **Core value:** Space·콘텐츠 CRUD와 RBAC 권한 제어가 올바르게 동작해야 한다
-**Current focus:** Phase 2 진행 중 — 메일 서버 연동 (02-01 완료)
+**Current focus:** Phase 2 진행 중 — 메일 서버 연동 (02-02 완료: IMAP 동기화 서비스)
 
 ## Current Position
 
 Phase: 2 진행 중 (메일 서버 연동)
-Plan: 1 of TBD in Phase 2 — 02-01 COMPLETE
+Plan: 2 of TBD in Phase 2 — 02-02 COMPLETE
 Status: In Progress
 Last activity: 2026-07-06
 
@@ -36,9 +36,9 @@ Progress: [████████░░] Phase 2 시작
 
 **Velocity:**
 
-- Total plans completed: 8 (Phase 1: 7, Phase 2: 1)
+- Total plans completed: 9 (Phase 1: 7, Phase 2: 2)
 - Average duration: ~15분/plan
-- Total execution time: ~120분
+- Total execution time: ~136분
 
 **By Phase:**
 
@@ -46,7 +46,7 @@ Progress: [████████░░] Phase 2 시작
 |-------|-------|-------|----------|
 | 0 | 8 | - | - |
 | 1 | 7 | ~100분 | ~14분 |
-| 2 (진행중) | 1 | ~7분 | ~7분 |
+| 2 (진행중) | 2 | ~23분 | ~11분 |
 
 ## Accumulated Context
 
@@ -63,6 +63,8 @@ Progress: [████████░░] Phase 2 시작
 - [Phase 1-02]: soft delete — deletedAt 필드 + status="DELETED" 동시 설정
 - [Phase 2-01]: AES 기본 키/IV 정확한 길이 필수 — secretKey 32바이트, IV 16바이트 (PKCS5Padding 제약)
 - [Phase 2-01]: MailAccountController.getGroupIds()는 List.of() — 그룹 권한 통합은 추후 계획
+- [Phase 2-02]: ImapService.extractText() IOException을 메서드 시그니처에서 제거하고 내부 try-catch 처리
+- [Phase 2-02]: MailPollingScheduler fixedDelay=300000 (완료 후 5분 대기, 동시 실행 방지)
 
 ### Pending Todos
 
@@ -80,6 +82,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-07-06T12:17:00.000Z
-Stopped at: Phase 02-01 완료 — 메일 계정 CRUD + AES-256 암호화 (4/4 테스트 통과)
+Last session: 2026-07-06T12:35:00.000Z
+Stopped at: Phase 02-02 완료 — IMAP 동기화 서비스 (3/3 단위 테스트 통과)
 Resume file: None

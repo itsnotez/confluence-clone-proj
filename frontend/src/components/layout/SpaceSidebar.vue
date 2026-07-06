@@ -6,6 +6,7 @@
     <ContentTree :space-key="spaceKey" />
     <div class="sidebar-footer">
       <button class="new-page-btn" @click="goNewPage">+ 새 페이지 만들기</button>
+      <button class="mailbox-btn" @click="goMailBox">메일함</button>
     </div>
   </aside>
 </template>
@@ -27,6 +28,10 @@ const spaceStore = useSpaceStore()
 
 function goNewPage() {
   router.push(`/spaces/${props.spaceKey}/contents/new`)
+}
+
+function goMailBox() {
+  router.push({ name: 'MailBox', params: { spaceKey: props.spaceKey } })
 }
 </script>
 
@@ -67,5 +72,19 @@ function goNewPage() {
 }
 .new-page-btn:hover {
   background: #1565c0;
+}
+.mailbox-btn {
+  width: 100%;
+  padding: 8px 12px;
+  background: #fff;
+  color: #1976d2;
+  border: 1px solid #1976d2;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  margin-top: 8px;
+}
+.mailbox-btn:hover {
+  background: #e3f2fd;
 }
 </style>

@@ -59,8 +59,24 @@ Plans:
 
 ### Phase 3: 검색·라벨·댓글·첨부파일
 **Goal**: PostgreSQL tsvector 전문검색 + 파일 관리
+**Status**: Planned
 **Depends on**: Phase 2
-**Plans**: TBD
+**Requirements**: SEARCH-01, LABEL-01, LABEL-02, COMMENT-01, COMMENT-02, ATTACH-01, ATTACH-02
+**Plans**: 6 plans
+
+Wave 1:
+- [x] 03-01: 전문검색 API — SearchService + SearchController + ContentSearchBody upsert (백엔드)
+
+Wave 2 *(blocked on Wave 1 completion)*:
+- [ ] 03-02: 라벨 API — Label/ContentLabel entity/service/controller + PermissionService 체크 (백엔드)
+- [ ] 03-03: 댓글 API — Comment entity/service/controller + soft delete (백엔드)
+- [ ] 03-04: 첨부파일 API — Attachment entity + S3Config + StorageService + MinIO 연동 (백엔드)
+
+Wave 3 *(blocked on Wave 2 completion)*:
+- [ ] 03-05: 검색·라벨 프론트엔드 — SearchResultView + AppHeader 검색창 + ContentView 라벨 패널
+
+Wave 4 *(blocked on Wave 3 completion)*:
+- [ ] 03-06: 댓글·첨부파일 프론트엔드 — CommentPanel + AttachmentPanel + ContentView 통합
 
 ### Phase 4: 관리자 대시보드·알림·감사로그
 **Goal**: 운영 도구 및 모니터링
@@ -79,6 +95,6 @@ Plans:
 | 0. 기반 구축 | 8/8 | Complete | 2026-07-01 |
 | 1. 핵심 기능 | 7/7 | Complete | 2026-07-06 |
 | 2. 메일 연동 | 4/4 | Complete | 2026-07-06 |
-| 3. 검색·첨부 | TBD | Not started | - |
+| 3. 검색·첨부 | 1/6 | In Progress|  |
 | 4. 관리자·알림 | TBD | Not started | - |
 | 5. 성능·UAT | TBD | Not started | - |

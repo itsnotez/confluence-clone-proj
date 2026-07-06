@@ -1,7 +1,6 @@
 package com.company.wiki.label.controller;
 
 import com.company.wiki.auth.dto.LoginRequest;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -123,22 +123,12 @@ class LabelControllerTest {
                 .andExpect(status().isOk());
 
         // 라벨 목록 조회
-        MvcResult result = mockMvc.perform(get("/contents/" + contentId + "/labels")
+        mockMvc.perform(get("/contents/" + contentId + "/labels")
                         .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data").isArray())
-                .andReturn();
-
-        JsonNode data = objectMapper.readTree(result.getResponse().getContentAsString()).path("data");
-        boolean found = false;
-        for (JsonNode node : data) {
-            if ("긴급".equals(node.path("name").asText())) {
-                found = true;
-                break;
-            }
-        }
-        assert found : "추가한 라벨 '긴급'이 조회 결과에 없습니다";
+                .andExpect(jsonPath("$.data[0].name").value("긴급"));
     }
 
     @Test

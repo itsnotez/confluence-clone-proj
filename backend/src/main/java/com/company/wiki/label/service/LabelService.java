@@ -36,7 +36,6 @@ public class LabelService {
                 .collect(Collectors.toList());
     }
 
-    @Transactional(readOnly = true)
     public List<LabelDto.Response> getLabels(Long contentId, Long userId, String role) {
         Content content = contentRepository.findByIdAndDeletedAtIsNull(contentId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.CONTENT_NOT_FOUND));

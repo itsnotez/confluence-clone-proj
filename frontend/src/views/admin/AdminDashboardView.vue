@@ -107,6 +107,79 @@
           </template>
         </DxItem>
 
+        <DxItem title="메일 계정 관리">
+          <template #default>
+            <div class="tab-content">
+              <div class="mail-toolbar">
+                <div class="mail-space-selector">
+                  <label>스페이스 선택</label>
+                  <DxSelectBox
+                    v-model:value="mailSelectedSpaceKey"
+                    :items="spaceList"
+                    display-expr="name"
+                    value-expr="spaceKey"
+                    placeholder="스페이스를 선택하세요"
+                    :width="260"
+                    @value-changed="onSpaceSelected"
+                  />
+                </div>
+                <DxButton
+                  text="+ 계정 추가"
+                  type="default"
+                  :disabled="!mailSelectedSpaceKey"
+                  @click="openMailAccountDialog"
+                />
+              </div>
+
+              <div v-if="!mailSelectedSpaceKey" class="no-data">스페이스를 선택하면 메일 계정 목록이 표시됩니다.</div>
+              <div v-else-if="mailAccountsLoading" class="loading-message">로딩 중...</div>
+              <div v-else>
+                <DxDataGrid
+                  :data-source="mailAccounts"
+                  :show-borders="true"
+                  :hover-state-enabled="true"
+                  :row-alternation-enabled="true"
+                  height="calc(100vh - 320px)"
+                  :no-data-text="'등록된 메일 계정이 없습니다.'"
+                >
+                  <DxColumn data-field="emailAddress" caption="이메일 주소" />
+                  <DxColumn data-field="imapHost" caption="IMAP 호스트" :width="180" />
+                  <DxColumn data-field="imapPort" caption="포트" :width="70" alignment="center" />
+                  <DxColumn
+                    caption="SSL"
+                    :width="60"
+                    alignment="center"
+                    :calculate-cell-value="(row) => row.imapSsl ? '✓' : '✗'"
+                  />
+                  <DxColumn
+                    data-field="syncStatus"
+                    caption="동기화 상태"
+                    :width="110"
+                    alignment="center"
+                    cell-template="syncStatusCell"
+                  />
+                  <DxColumn data-field="lastSyncedAt" caption="마지막 동기화" data-type="datetime" :width="170" />
+                  <DxColumn caption="관리" :width="90" alignment="center" cell-template="mailActionCell" />
+                  <template #syncStatusCell="{ data }">
+                    <span :class="['status-badge', data.value === 'OK' ? 'active' : data.value === 'ERROR' ? 'inactive' : 'pending']">
+                      {{ data.value === 'OK' ? '정상' : data.value === 'ERROR' ? '오류' : '대기' }}
+                    </span>
+                  </template>
+                  <template #mailActionCell="{ data }">
+                    <DxButton
+                      text="삭제"
+                      type="danger"
+                      styling-mode="outlined"
+                      @click="deleteMailAccount(data.data)"
+                    />
+                  </template>
+                  <DxPaging :page-size="20" />
+                </DxDataGrid>
+              </div>
+            </div>
+          </template>
+        </DxItem>
+
         <DxItem title="감사로그">
           <template #default>
             <div class="tab-content">
@@ -185,6 +258,53 @@
       </div>
     </DxPopup>
   </div>
+
+  <!-- 메일 계정 추가 다이얼로그 -->
+  <DxPopup
+    v-model:visible="mailAccountDialogVisible"
+    title="메일 계정 추가"
+    :width="460"
+    :height="'auto'"
+    :show-close-button="true"
+  >
+    <div class="dialog-form">
+      <div class="form-row">
+        <label>이메일 주소</label>
+        <DxTextBox v-model:value="mailForm.emailAddress" placeholder="example@company.com" />
+      </div>
+      <div class="form-row">
+        <label>비밀번호</label>
+        <DxTextBox v-model:value="mailForm.password" mode="password" placeholder="앱 비밀번호 또는 계정 비밀번호" />
+      </div>
+      <div class="form-row">
+        <label>IMAP 호스트</label>
+        <DxTextBox v-model:value="mailForm.imapHost" placeholder="imap.gmail.com" />
+      </div>
+      <div class="form-row form-row-inline">
+        <div class="form-row" style="flex:1">
+          <label>IMAP 포트</label>
+          <DxTextBox v-model:value="mailForm.imapPort" placeholder="993" />
+        </div>
+        <div class="form-row form-row-check">
+          <label>SSL 사용</label>
+          <DxCheckBox v-model:value="mailForm.imapSsl" />
+        </div>
+      </div>
+      <div class="form-row">
+        <label>SMTP 호스트 <span class="optional">(선택)</span></label>
+        <DxTextBox v-model:value="mailForm.smtpHost" placeholder="smtp.gmail.com" />
+      </div>
+      <div class="form-row">
+        <label>SMTP 포트 <span class="optional">(선택)</span></label>
+        <DxTextBox v-model:value="mailForm.smtpPort" placeholder="587" />
+      </div>
+      <div class="form-error" v-if="mailFormError">{{ mailFormError }}</div>
+      <div class="form-actions">
+        <DxButton text="취소" type="normal" styling-mode="outlined" @click="mailAccountDialogVisible = false" />
+        <DxButton text="추가" type="default" :disabled="mailFormSubmitting" @click="submitMailAccount" />
+      </div>
+    </div>
+  </DxPopup>
 </template>
 
 <script setup>
@@ -192,12 +312,15 @@ import { ref, computed, onMounted } from 'vue'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import { adminApi } from '@/api/admin'
 import { userApi } from '@/api/user'
+import { mailAccountApi } from '@/api/mail'
+import spaceApi from '@/api/space'
 import { DxTabPanel, DxItem } from 'devextreme-vue/tab-panel'
 import { DxPieChart, DxSeries } from 'devextreme-vue/pie-chart'
 import { DxDataGrid, DxColumn, DxPaging, DxFilterRow, DxSearchPanel } from 'devextreme-vue/data-grid'
 import { DxPopup } from 'devextreme-vue/popup'
 import { DxTextBox } from 'devextreme-vue/text-box'
 import { DxSelectBox } from 'devextreme-vue/select-box'
+import { DxCheckBox } from 'devextreme-vue/check-box'
 import { DxButton } from 'devextreme-vue/button'
 
 const ACTION_LABELS = {
@@ -322,6 +445,91 @@ async function toggleStatus(user) {
   await loadUsers()
 }
 
+// 메일 계정 관리
+const spaceList = ref([])
+const mailSelectedSpaceKey = ref(null)
+const mailAccounts = ref([])
+const mailAccountsLoading = ref(false)
+const mailAccountDialogVisible = ref(false)
+const mailFormSubmitting = ref(false)
+const mailFormError = ref('')
+const emptyMailForm = () => ({
+  emailAddress: '',
+  password: '',
+  imapHost: '',
+  imapPort: '993',
+  imapSsl: true,
+  smtpHost: '',
+  smtpPort: '587'
+})
+const mailForm = ref(emptyMailForm())
+
+async function loadSpaces() {
+  try {
+    const res = await spaceApi.getSpaces()
+    spaceList.value = res.data.data || []
+  } catch (e) {
+    console.error('스페이스 목록 조회 실패:', e)
+  }
+}
+
+async function onSpaceSelected() {
+  if (!mailSelectedSpaceKey.value) return
+  mailAccountsLoading.value = true
+  try {
+    const res = await mailAccountApi.getAccounts(mailSelectedSpaceKey.value)
+    mailAccounts.value = res.data.data || []
+  } catch (e) {
+    console.error('메일 계정 조회 실패:', e)
+    mailAccounts.value = []
+  } finally {
+    mailAccountsLoading.value = false
+  }
+}
+
+function openMailAccountDialog() {
+  mailForm.value = emptyMailForm()
+  mailFormError.value = ''
+  mailAccountDialogVisible.value = true
+}
+
+async function submitMailAccount() {
+  mailFormError.value = ''
+  const f = mailForm.value
+  if (!f.emailAddress.trim() || !f.password.trim() || !f.imapHost.trim()) {
+    mailFormError.value = '이메일 주소, 비밀번호, IMAP 호스트는 필수입니다.'
+    return
+  }
+  mailFormSubmitting.value = true
+  try {
+    await mailAccountApi.createAccount(mailSelectedSpaceKey.value, {
+      emailAddress: f.emailAddress,
+      password: f.password,
+      imapHost: f.imapHost,
+      imapPort: Number(f.imapPort) || 993,
+      imapSsl: f.imapSsl,
+      smtpHost: f.smtpHost || null,
+      smtpPort: Number(f.smtpPort) || 587
+    })
+    mailAccountDialogVisible.value = false
+    await onSpaceSelected()
+  } catch (e) {
+    mailFormError.value = e.response?.data?.message || '계정 추가에 실패했습니다.'
+  } finally {
+    mailFormSubmitting.value = false
+  }
+}
+
+async function deleteMailAccount(account) {
+  if (!confirm(`'${account.emailAddress}' 계정을 삭제하시겠습니까?`)) return
+  try {
+    await mailAccountApi.deleteAccount(mailSelectedSpaceKey.value, account.id)
+    await onSpaceSelected()
+  } catch (e) {
+    alert(e.response?.data?.message || '삭제에 실패했습니다.')
+  }
+}
+
 const mailStatusData = computed(() => {
   if (!stats.value) return []
   return [
@@ -352,7 +560,7 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
-  await loadUsers()
+  await Promise.all([loadUsers(), loadSpaces()])
 })
 </script>
 
@@ -479,5 +687,44 @@ onMounted(async () => {
   justify-content: flex-end;
   gap: 8px;
   margin-top: 4px;
+}
+.mail-toolbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  gap: 12px;
+}
+.mail-space-selector {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.mail-space-selector label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #555;
+  white-space: nowrap;
+}
+.form-row-inline {
+  display: flex;
+  gap: 16px;
+  flex-direction: row !important;
+  align-items: flex-end;
+}
+.form-row-check {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 80px;
+}
+.optional {
+  font-size: 11px;
+  color: #999;
+  font-weight: 400;
+}
+.status-badge.pending {
+  background: #fff8e1;
+  color: #f57f17;
 }
 </style>

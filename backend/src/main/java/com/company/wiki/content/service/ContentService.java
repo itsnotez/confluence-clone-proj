@@ -1,5 +1,6 @@
 package com.company.wiki.content.service;
 
+import com.company.wiki.auditlog.service.AuditLogService;
 import com.company.wiki.common.exception.BusinessException;
 import com.company.wiki.common.exception.ErrorCode;
 import com.company.wiki.content.dto.ContentDto;
@@ -15,6 +16,7 @@ import com.company.wiki.user.entity.User;
 import com.company.wiki.user.repository.GroupMemberRepository;
 import com.company.wiki.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +24,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -34,6 +37,7 @@ public class ContentService {
     private final UserRepository userRepository;
     private final PermissionService permissionService;
     private final GroupMemberRepository groupMemberRepository;
+    private final AuditLogService auditLogService;
 
     private List<Long> getUserGroupIds(Long userId) {
         return groupMemberRepository.findByUserId(userId).stream()
@@ -249,6 +253,15 @@ public class ContentService {
         content.setDeletedAt(LocalDateTime.now());
         content.setStatus("ARCHIVED");
         contentRepository.save(content);
+
+        try {
+            auditLogService.record(userId, "CONTENT_DELETE", "CONTENT", contentId,
+                    Map.of("title", content.getTitle() != null ? content.getTitle() : "",
+                           "spaceId", content.getSpaceId()),
+                    false);
+        } catch (Exception e) {
+            log.warn("audit failed: {}", e.getMessage());
+        }
     }
 
     // -------------------------------------------------------

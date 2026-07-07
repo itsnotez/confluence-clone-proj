@@ -1,5 +1,6 @@
 package com.company.wiki.space.service;
 
+import com.company.wiki.auditlog.service.AuditLogService;
 import com.company.wiki.common.exception.BusinessException;
 import com.company.wiki.common.exception.ErrorCode;
 import com.company.wiki.space.dto.SpaceDto;
@@ -11,13 +12,17 @@ import com.company.wiki.space.repository.SpaceRepository;
 import com.company.wiki.user.entity.User;
 import com.company.wiki.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -26,6 +31,7 @@ public class SpaceService {
     private final SpaceRepository spaceRepository;
     private final SpaceFavoriteRepository spaceFavoriteRepository;
     private final UserRepository userRepository;
+    private final AuditLogService auditLogService;
 
     @Transactional(readOnly = true)
     public List<SpaceDto.Response> findAll(Long currentUserId) {
@@ -103,6 +109,16 @@ public class SpaceService {
         space.setDeletedAt(LocalDateTime.now());
         space.setStatus("DELETED");
         spaceRepository.save(space);
+
+        try {
+            Long actorId = Long.parseLong(
+                    SecurityContextHolder.getContext().getAuthentication().getName());
+            auditLogService.record(actorId, "SPACE_DELETE", "SPACE", space.getId(),
+                    Map.of("spaceKey", space.getSpaceKey(), "name", space.getName()),
+                    false);
+        } catch (Exception e) {
+            log.warn("audit failed: {}", e.getMessage());
+        }
     }
 
     public void toggleFavorite(String spaceKey, Long userId) {

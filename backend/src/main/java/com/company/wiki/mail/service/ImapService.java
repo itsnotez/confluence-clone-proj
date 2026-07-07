@@ -43,12 +43,12 @@ public class ImapService {
         props.put("mail.imap.host", account.getImapHost());
         props.put("mail.imap.port", String.valueOf(account.getImapPort()));
         props.put("mail.imap.ssl.enable", String.valueOf(account.isImapSsl()));
-        props.put("mail.imap.connectiontimeout", "5000");
-        props.put("mail.imap.timeout", "5000");
+        props.put("mail.imap.connectiontimeout", "15000");
+        props.put("mail.imap.timeout", "15000");
         props.put("mail.imaps.host", account.getImapHost());
         props.put("mail.imaps.port", String.valueOf(account.getImapPort()));
-        props.put("mail.imaps.connectiontimeout", "5000");
-        props.put("mail.imaps.timeout", "5000");
+        props.put("mail.imaps.connectiontimeout", "15000");
+        props.put("mail.imaps.timeout", "15000");
 
         Session session = Session.getInstance(props);
         Store store = null;
@@ -68,6 +68,14 @@ public class ImapService {
 
             int start = Math.max(1, messages.length - maxFetch + 1);
             Message[] recent = inbox.getMessages(start, messages.length);
+
+            // 본문을 포함해 한 번에 pre-fetch (lazy fetch 방지)
+            FetchProfile fp = new FetchProfile();
+            fp.add(FetchProfile.Item.ENVELOPE);
+            fp.add(FetchProfile.Item.CONTENT_INFO);
+            fp.add(UIDFolder.FetchProfileItem.UID);
+            fp.add("X-mailer");
+            inbox.fetch(recent, fp);
 
             List<MailMessage> result = new ArrayList<>();
             for (Message msg : recent) {
@@ -89,7 +97,7 @@ public class ImapService {
                             .bodyText(body)
                             .build());
                 } catch (Exception e) {
-                    log.warn("메시지 파싱 실패 (건너뜀): {}", e.getMessage());
+                    log.warn("메시지 파싱 실패 (건너뜀): {} — {}", e.getClass().getSimpleName(), e.getMessage());
                 }
             }
 
@@ -155,16 +163,22 @@ public class ImapService {
                 for (int i = 0; i < mp.getCount(); i++) {
                     BodyPart bp = mp.getBodyPart(i);
                     if (bp.isMimeType("text/plain") && plainText == null) {
-                        try { plainText = extractText(bp); } catch (Exception ignore) {}
+                        try { plainText = extractText(bp); } catch (Exception e) {
+                            log.warn("text/plain 추출 실패: {} — {}", e.getClass().getSimpleName(), e.getMessage());
+                        }
                     } else if (bp.isMimeType("text/html") && htmlText == null) {
-                        try { htmlText = extractText(bp); } catch (Exception ignore) {}
+                        try { htmlText = extractText(bp); } catch (Exception e) {
+                            log.warn("text/html 추출 실패: {} — {}", e.getClass().getSimpleName(), e.getMessage());
+                        }
                     } else if (bp.isMimeType("multipart/*")) {
                         try {
                             String nested = extractText(bp);
                             if (nested != null && !nested.isBlank() && plainText == null) {
                                 plainText = nested;
                             }
-                        } catch (Exception ignore) {}
+                        } catch (Exception e) {
+                            log.warn("multipart 추출 실패: {} — {}", e.getClass().getSimpleName(), e.getMessage());
+                        }
                     }
                 }
                 if (plainText != null && !plainText.isBlank()) return plainText;

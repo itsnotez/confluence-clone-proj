@@ -85,8 +85,8 @@ Wave 4 *(blocked on Wave 3 completion)*:
 **Plans**: 6 plans
 
 Wave 1 *(독립 실행 가능)*:
-- [ ] 04-01-PLAN.md — 감사로그 백엔드 (AuditLog entity/repository/service + PermissionService/SpaceService/MailAccountService/ContentService 통합)
-- [ ] 04-02-PLAN.md — 알림 백엔드 (Notification entity/repository/service + CommentService 통합)
+- [x] 04-01-PLAN.md — 감사로그 백엔드 (AuditLog entity/repository/service + PermissionService/SpaceService/MailAccountService/ContentService 통합)
+- [x] 04-02-PLAN.md — 알림 백엔드 (Notification entity/repository/service + CommentService 통합)
 
 Wave 2 *(blocked on Wave 1 completion)*:
 - [ ] 04-03-PLAN.md — 관리자 통계 API (AdminStatsService + AdminController: GET /admin/stats, GET /admin/audit-logs)
@@ -109,5 +109,5 @@ Wave 3 *(blocked on Wave 2 completion)*:
 | 1. 핵심 기능 | 7/7 | Complete | 2026-07-06 |
 | 2. 메일 연동 | 4/4 | Complete | 2026-07-06 |
 | 3. 검색·첨부 | 6/6 | Complete | 2026-07-07 |
-| 4. 관리자·알림 | 0/6 | Not started | - |
+| 4. 관리자·알림 | 2/6 | In Progress|  |
 | 5. 성능·UAT | TBD | Not started | - |

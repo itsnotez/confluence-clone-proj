@@ -15,7 +15,8 @@
       <button class="toolbar-btn" :class="{ active: editor?.isActive('codeBlock') }" @click="editor?.chain().focus().toggleCodeBlock().run()" title="코드 블록">{ }</button>
       <span class="toolbar-sep">|</span>
       <button class="toolbar-btn" @click="setLink" title="링크">링크</button>
-      <button class="toolbar-btn" @click="addImage" title="이미지">이미지</button>
+      <button class="toolbar-btn" @click="triggerImageUpload" title="이미지">이미지</button>
+      <input ref="imageInputRef" type="file" accept="image/*" multiple class="hidden-file-input" @change="handleImageFileSelect" />
     </div>
     <editor-content
       :editor="editor"
@@ -113,18 +114,21 @@ function setLink() {
   }
 }
 
-function addImage() {
-  const url = window.prompt('이미지 URL 입력:')
-  if (url) {
-    editor.value?.chain().focus().setImage({ src: url }).run()
-  }
+const imageInputRef = ref(null)
+
+function triggerImageUpload() {
+  imageInputRef.value?.click()
+}
+
+function handleImageFileSelect(event) {
+  const files = Array.from(event.target.files ?? []).filter(f => f.type.startsWith('image/'))
+  event.target.value = ''
+  insertImageFiles(files)
 }
 
 const isDragOver = ref(false)
 
-function handleDrop(event) {
-  isDragOver.value = false
-  const files = Array.from(event.dataTransfer?.files ?? []).filter(f => f.type.startsWith('image/'))
+function insertImageFiles(files) {
   if (!files.length) return
   files.forEach(file => {
     const reader = new FileReader()
@@ -136,6 +140,12 @@ function handleDrop(event) {
     }
     reader.readAsDataURL(file)
   })
+}
+
+function handleDrop(event) {
+  isDragOver.value = false
+  const files = Array.from(event.dataTransfer?.files ?? []).filter(f => f.type.startsWith('image/'))
+  insertImageFiles(files)
 }
 
 onBeforeUnmount(() => {
@@ -180,6 +190,9 @@ onBeforeUnmount(() => {
 .toolbar-sep {
   color: #ccc;
   padding: 0 4px;
+}
+.hidden-file-input {
+  display: none;
 }
 .editor-content {
   min-height: 400px;

@@ -12,7 +12,7 @@ const routes = [
   { path: '/spaces/:spaceKey/permissions', component: () => import('@/views/space/SpacePermissionView.vue') },
   { path: '/spaces/:spaceKey/mail', name: 'MailBox', component: () => import('@/views/mail/MailBoxView.vue'), meta: { requiresAuth: true } },
   { path: '/search', component: () => import('@/views/search/SearchResultView.vue') },
-  { path: '/admin', component: () => import('@/views/admin/AdminDashboardView.vue') }
+  { path: '/admin', component: () => import('@/views/admin/AdminDashboardView.vue'), meta: { requiresAdmin: true } }
 ]
 
 const router = createRouter({
@@ -23,6 +23,9 @@ const router = createRouter({
 router.beforeEach((to) => {
   const auth = useAuthStore()
   if (!to.meta.public && !auth.isLoggedIn) return '/login'
+  if (to.meta.requiresAdmin) {
+    if (!auth.user || auth.user.role !== 'SITE_ADMIN') return '/spaces'
+  }
 })
 
 export default router

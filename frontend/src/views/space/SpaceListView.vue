@@ -5,6 +5,7 @@
       <div class="page-header">
         <h2>스페이스 목록</h2>
         <DxButton
+          v-if="auth.user?.role === 'SITE_ADMIN'"
           text="새 Space 만들기"
           type="default"
           styling-mode="contained"
@@ -98,6 +99,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSpaceStore } from '@/stores/space'
+import { useAuthStore } from '@/stores/auth'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import { DxDataGrid, DxColumn } from 'devextreme-vue/data-grid'
 import { DxPopup } from 'devextreme-vue/popup'
@@ -106,6 +108,7 @@ import { DxButton } from 'devextreme-vue/button'
 
 const router = useRouter()
 const spaceStore = useSpaceStore()
+const auth = useAuthStore()
 const showCreateDialog = ref(false)
 
 const createForm = reactive({

@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -39,6 +40,7 @@ public class SpaceController {
         return ApiResponse.ok(spaceService.findByKey(spaceKey, userId));
     }
 
+    @PreAuthorize("hasAuthority('ROLE_SITE_ADMIN')")
     @PostMapping
     public ApiResponse<SpaceDto.Response> createSpace(
             @Valid @RequestBody SpaceDto.CreateRequest req,

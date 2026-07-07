@@ -82,7 +82,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useContentStore } from '@/stores/content'
 import AppHeader from '@/components/layout/AppHeader.vue'
@@ -101,7 +101,7 @@ const router = useRouter()
 const contentStore = useContentStore()
 
 const spaceKey = route.params.spaceKey
-const contentId = route.params.contentId
+const contentId = computed(() => route.params.contentId)
 const loading = ref(true)
 const showVersionHistory = ref(false)
 
@@ -153,15 +153,19 @@ async function removeLabel(labelId) {
   }
 }
 
-onMounted(async () => {
-  await contentStore.fetchContent(contentId)
+async function loadContent() {
+  loading.value = true
+  await contentStore.fetchContent(contentId.value)
   loading.value = false
   await loadLabels()
   await loadSpaceLabels()
-})
+}
+
+onMounted(loadContent)
+watch(contentId, loadContent)
 
 function goEdit() {
-  router.push(`/spaces/${spaceKey}/contents/${contentId}/edit`)
+  router.push(`/spaces/${spaceKey}/contents/${contentId.value}/edit`)
 }
 
 function formatDate(dateStr) {

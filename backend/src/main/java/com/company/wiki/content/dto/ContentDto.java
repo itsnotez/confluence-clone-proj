@@ -49,6 +49,7 @@ public class ContentDto {
         private UserSummary createdBy;
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
+        private String body;
         private String bodyPreview;
     }
 

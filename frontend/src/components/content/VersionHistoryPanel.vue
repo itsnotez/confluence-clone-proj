@@ -69,7 +69,7 @@ async function loadVersions() {
   loading.value = true
   try {
     const res = await contentApi.getVersions(props.contentId)
-    versions.value = res.data || []
+    versions.value = res.data.data || []
   } catch (err) {
     console.error('버전 조회 실패:', err)
     versions.value = []

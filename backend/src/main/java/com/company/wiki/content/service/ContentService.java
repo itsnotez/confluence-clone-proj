@@ -310,6 +310,7 @@ public class ContentService {
                 .createdBy(toUserSummary(c.getCreatedBy()))
                 .createdAt(c.getCreatedAt())
                 .updatedAt(c.getUpdatedAt())
+                .body(body)
                 .bodyPreview(preview)
                 .build();
     }

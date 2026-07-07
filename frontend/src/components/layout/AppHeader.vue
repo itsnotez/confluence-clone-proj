@@ -12,6 +12,7 @@
       />
     </div>
     <div class="header-right">
+      <router-link v-if="auth.user?.role === 'SITE_ADMIN'" to="/admin" class="admin-link">관리자</router-link>
       <span v-if="auth.user" class="user-name">{{ auth.user.name }}</span>
 
       <!-- 알림 벨 아이콘 -->
@@ -158,6 +159,18 @@ onUnmounted(() => {
   align-items: center;
   gap: 12px;
   margin-left: 24px;
+}
+.admin-link {
+  color: white;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 4px;
+  text-decoration: none;
+}
+.admin-link:hover {
+  background: rgba(255, 255, 255, 0.15);
 }
 .user-name {
   color: white;

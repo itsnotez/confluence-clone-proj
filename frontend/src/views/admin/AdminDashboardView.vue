@@ -1,5 +1,6 @@
 <template>
   <div class="admin-page">
+    <AppHeader />
     <div class="admin-header">
       <h1>관리자 대시보드</h1>
     </div>
@@ -92,6 +93,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import AppHeader from '@/components/layout/AppHeader.vue'
 import { adminApi } from '@/api/admin'
 import { DxTabPanel, DxItem } from 'devextreme-vue/tab-panel'
 import { DxPieChart, DxSeries } from 'devextreme-vue/pie-chart'

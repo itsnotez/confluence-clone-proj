@@ -62,12 +62,24 @@
                 :row-alternation-enabled="true"
                 height="calc(100vh - 220px)"
               >
-                <DxColumn data-field="actorId" caption="수행자" />
-                <DxColumn data-field="actionType" caption="액션" />
-                <DxColumn data-field="targetType" caption="대상 타입" />
-                <DxColumn data-field="targetId" caption="대상 ID" />
-                <DxColumn data-field="isAdminAccess" caption="관리자" />
-                <DxColumn data-field="createdAt" caption="시각" data-type="datetime" />
+                <DxSearchPanel :visible="true" placeholder="검색..." />
+                <DxFilterRow :visible="true" />
+                <DxColumn data-field="actorId" caption="사용자 ID" :width="100" alignment="center" />
+                <DxColumn
+                  caption="액션"
+                  :calculate-cell-value="(row) => ACTION_LABELS[row.actionType] || row.actionType"
+                  :width="160"
+                />
+                <DxColumn
+                  caption="대상"
+                  :calculate-cell-value="(row) => formatTarget(row)"
+                  :width="160"
+                />
+                <DxColumn
+                  caption="설명"
+                  :calculate-cell-value="(row) => parseDetail(row.detail)"
+                />
+                <DxColumn data-field="createdAt" caption="시각" data-type="datetime" :width="180" />
                 <DxPaging :page-size="20" />
               </DxDataGrid>
             </div>
@@ -83,7 +95,45 @@ import { ref, computed, onMounted } from 'vue'
 import { adminApi } from '@/api/admin'
 import { DxTabPanel, DxItem } from 'devextreme-vue/tab-panel'
 import { DxPieChart, DxSeries } from 'devextreme-vue/pie-chart'
-import { DxDataGrid, DxColumn, DxPaging } from 'devextreme-vue/data-grid'
+import { DxDataGrid, DxColumn, DxPaging, DxFilterRow, DxSearchPanel } from 'devextreme-vue/data-grid'
+
+const ACTION_LABELS = {
+  ADMIN_ACCESS: '관리자 접속',
+  SPACE_CREATE: '스페이스 생성',
+  SPACE_DELETE: '스페이스 삭제',
+  CONTENT_DELETE: '콘텐츠 삭제',
+  PERMISSION_CHANGE: '권한 변경',
+  MAIL_ACCOUNT_CREATE: '메일계정 생성',
+  MAIL_ACCOUNT_DELETE: '메일계정 삭제',
+}
+
+const TARGET_LABELS = {
+  ADMIN: '관리',
+  SPACE: '스페이스',
+  CONTENT: '콘텐츠',
+  PERMISSION: '권한',
+  MAIL_ACCOUNT: '메일계정',
+}
+
+function formatTarget(row) {
+  const type = TARGET_LABELS[row.targetType] || row.targetType
+  return row.targetId ? `${type} #${row.targetId}` : type
+}
+
+function parseDetail(detail) {
+  if (!detail) return '-'
+  try {
+    const obj = JSON.parse(detail)
+    if (obj.endpoint) return obj.endpoint
+    if (obj.spaceName) return obj.spaceName
+    if (obj.spaceKey) return `[${obj.spaceKey}]`
+    if (obj.contentTitle) return obj.contentTitle
+    const first = Object.values(obj)[0]
+    return first != null ? String(first) : '-'
+  } catch {
+    return detail
+  }
+}
 
 const stats = ref(null)
 const auditLogs = ref([])

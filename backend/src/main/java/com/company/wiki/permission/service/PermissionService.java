@@ -1,15 +1,19 @@
 package com.company.wiki.permission.service;
 
+import com.company.wiki.auditlog.service.AuditLogService;
 import com.company.wiki.permission.entity.ContentPermission;
 import com.company.wiki.permission.entity.SpacePermission;
 import com.company.wiki.permission.repository.ContentPermissionRepository;
 import com.company.wiki.permission.repository.SpacePermissionRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -18,6 +22,7 @@ import java.util.Optional;
  * 권한 레벨 우선순위 (높을수록 강함): SPACE_ADMIN > WRITE > READ > NONE
  * 판단 우선순위: 개인(USER) > 그룹(GROUP) > 전체(ALL)
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -25,6 +30,7 @@ public class PermissionService {
 
     private final SpacePermissionRepository spacePermissionRepository;
     private final ContentPermissionRepository contentPermissionRepository;
+    private final AuditLogService auditLogService;
 
     // 권한 레벨 순위 (낮은 숫자 = 낮은 권한)
     private static final List<String> PERMISSION_ORDER = List.of("NONE", "READ", "WRITE", "SPACE_ADMIN");
@@ -169,10 +175,11 @@ public class PermissionService {
                     .findBySpaceIdAndSubjectTypeAndSubjectId(spaceId, subjectType, subjectId);
         }
 
+        SpacePermission saved;
         if (existing.isPresent()) {
             SpacePermission sp = existing.get();
             sp.setPermissionLevel(permissionLevel);
-            return spacePermissionRepository.save(sp);
+            saved = spacePermissionRepository.save(sp);
         } else {
             SpacePermission sp = SpacePermission.builder()
                     .spaceId(spaceId)
@@ -180,8 +187,22 @@ public class PermissionService {
                     .subjectId("ALL".equals(subjectType) ? null : subjectId)
                     .permissionLevel(permissionLevel)
                     .build();
-            return spacePermissionRepository.save(sp);
+            saved = spacePermissionRepository.save(sp);
         }
+
+        try {
+            Long actorId = Long.parseLong(
+                    SecurityContextHolder.getContext().getAuthentication().getName());
+            auditLogService.record(actorId, "PERMISSION_CHANGE", "PERMISSION", spaceId,
+                    Map.of("subjectType", subjectType != null ? subjectType : "",
+                           "subjectId", subjectId != null ? subjectId : 0L,
+                           "permissionLevel", permissionLevel != null ? permissionLevel : ""),
+                    false);
+        } catch (Exception e) {
+            log.warn("audit failed: {}", e.getMessage());
+        }
+
+        return saved;
     }
 
     /**

@@ -17,12 +17,19 @@
       <button class="toolbar-btn" @click="setLink" title="링크">링크</button>
       <button class="toolbar-btn" @click="addImage" title="이미지">이미지</button>
     </div>
-    <editor-content :editor="editor" class="editor-content" />
+    <editor-content
+      :editor="editor"
+      class="editor-content"
+      :class="{ 'drag-over': isDragOver }"
+      @dragover.prevent="isDragOver = true"
+      @dragleave="isDragOver = false"
+      @drop.prevent="handleDrop"
+    />
   </div>
 </template>
 
 <script setup>
-import { onBeforeUnmount, watch } from 'vue'
+import { onBeforeUnmount, watch, ref } from 'vue'
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'
@@ -96,6 +103,24 @@ function addImage() {
   }
 }
 
+const isDragOver = ref(false)
+
+function handleDrop(event) {
+  isDragOver.value = false
+  const files = Array.from(event.dataTransfer?.files ?? []).filter(f => f.type.startsWith('image/'))
+  if (!files.length) return
+  files.forEach(file => {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const src = e.target?.result
+      if (src) {
+        editor.value?.chain().focus().setImage({ src: String(src) }).run()
+      }
+    }
+    reader.readAsDataURL(file)
+  })
+}
+
 onBeforeUnmount(() => {
   editor.value?.destroy()
 })
@@ -143,6 +168,12 @@ onBeforeUnmount(() => {
   min-height: 400px;
   padding: 16px;
   background: white;
+  transition: background 0.15s;
+}
+.editor-content.drag-over {
+  background: #e8f0fe;
+  outline: 2px dashed #1976d2;
+  outline-offset: -2px;
 }
 .editor-content :deep(.ProseMirror) {
   min-height: 370px;

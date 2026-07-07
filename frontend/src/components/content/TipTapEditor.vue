@@ -4,6 +4,7 @@
       <button class="toolbar-btn" :class="{ active: editor?.isActive('bold') }" @click="editor?.chain().focus().toggleBold().run()" title="굵게">B</button>
       <button class="toolbar-btn" :class="{ active: editor?.isActive('italic') }" @click="editor?.chain().focus().toggleItalic().run()" title="기울임"><i>I</i></button>
       <button class="toolbar-btn" :class="{ active: editor?.isActive('underline') }" @click="editor?.chain().focus().toggleUnderline().run()" title="밑줄">U</button>
+      <button class="toolbar-btn strike-btn" :class="{ active: editor?.isActive('strike') }" @click="editor?.chain().focus().toggleStrike().run()" title="취소선">S</button>
       <span class="toolbar-sep">|</span>
       <button class="toolbar-btn" :class="{ active: editor?.isActive('heading', { level: 1 }) }" @click="editor?.chain().focus().toggleHeading({ level: 1 }).run()" title="제목 1">H1</button>
       <button class="toolbar-btn" :class="{ active: editor?.isActive('heading', { level: 2 }) }" @click="editor?.chain().focus().toggleHeading({ level: 2 }).run()" title="제목 2">H2</button>
@@ -190,6 +191,9 @@ onBeforeUnmount(() => {
 .toolbar-sep {
   color: #ccc;
   padding: 0 4px;
+}
+.strike-btn {
+  text-decoration: line-through;
 }
 .hidden-file-input {
   display: none;

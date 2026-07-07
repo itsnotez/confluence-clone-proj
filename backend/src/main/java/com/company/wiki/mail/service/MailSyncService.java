@@ -41,11 +41,20 @@ public class MailSyncService {
                 List<MailMessage> fetched = imapService.fetchNewMessages(account, 50);
                 int saved = 0;
                 for (MailMessage msg : fetched) {
-                    if (!mailMessageRepository.existsByMailAccountIdAndMessageUid(
-                            account.getId(), msg.getMessageUid())) {
-                        mailMessageRepository.save(msg);
-                        saved++;
-                    }
+                    mailMessageRepository
+                            .findByMailAccountIdAndMessageUid(account.getId(), msg.getMessageUid())
+                            .ifPresentOrElse(existing -> {
+                                // 본문이 비어있던 기존 메시지는 내용 업데이트
+                                if (existing.getBodyText() == null || existing.getBodyText().isBlank()) {
+                                    existing.setBodyText(msg.getBodyText());
+                                    existing.setSender(msg.getSender());
+                                    existing.setSubject(msg.getSubject());
+                                    mailMessageRepository.save(existing);
+                                }
+                            }, () -> {
+                                mailMessageRepository.save(msg);
+                            });
+                    saved++;
                 }
                 account.setSyncStatus("ACTIVE");
                 account.setLastSyncedAt(LocalDateTime.now());

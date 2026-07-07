@@ -10,6 +10,8 @@ public interface MailMessageRepository extends JpaRepository<MailMessage, Long> 
 
     boolean existsByMailAccountIdAndMessageUid(Long mailAccountId, String messageUid);
 
+    Optional<MailMessage> findByMailAccountIdAndMessageUid(Long mailAccountId, String messageUid);
+
     List<MailMessage> findByMailAccountIdOrderByReceivedAtDesc(Long mailAccountId);
 
     Optional<MailMessage> findByIdAndMailAccountId(Long id, Long mailAccountId);

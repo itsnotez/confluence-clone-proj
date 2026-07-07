@@ -4,7 +4,8 @@ import com.company.wiki.common.util.AesEncryptUtil;
 import com.company.wiki.mail.entity.MailAccount;
 import com.company.wiki.mail.entity.MailMessage;
 import jakarta.mail.*;
-import jakarta.mail.internet.MimeMultipart;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeUtility;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -70,8 +71,7 @@ public class ImapService {
                 try {
                     String uid = String.valueOf(((UIDFolder) inbox).getUID(msg));
                     String subject = msg.getSubject() != null ? msg.getSubject() : "(제목없음)";
-                    String from = msg.getFrom() != null && msg.getFrom().length > 0
-                            ? msg.getFrom()[0].toString() : "";
+                    String from = decodeSender(msg);
                     LocalDateTime received = msg.getReceivedDate() != null
                             ? msg.getReceivedDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
                             : LocalDateTime.now();
@@ -112,28 +112,80 @@ public class ImapService {
         }
     }
 
+    private String decodeSender(Message msg) {
+        try {
+            Address[] from = msg.getFrom();
+            if (from == null || from.length == 0) return "";
+            Address addr = from[0];
+            if (addr instanceof InternetAddress ia) {
+                String personal = ia.getPersonal();
+                String email = ia.getAddress();
+                if (personal != null && !personal.isBlank()) {
+                    try { personal = MimeUtility.decodeText(personal); } catch (Exception ignore) {}
+                    return personal + " <" + email + ">";
+                }
+                return email != null ? email : addr.toString();
+            }
+            return MimeUtility.decodeText(addr.toString());
+        } catch (Exception e) {
+            log.warn("발신자 디코딩 실패: {}", e.getMessage());
+            return "";
+        }
+    }
+
     /**
      * 메일 파트에서 텍스트 본문을 재귀적으로 추출한다.
+     * text/plain 우선, 없으면 text/html 태그 제거 후 반환.
      */
     private String extractText(Part part) throws MessagingException {
         try {
             if (part.isMimeType("text/plain")) {
-                return (String) part.getContent();
+                Object content = part.getContent();
+                return content != null ? content.toString() : "";
+            }
+            if (part.isMimeType("text/html")) {
+                Object content = part.getContent();
+                if (content == null) return "";
+                return stripHtml(content.toString());
             }
             if (part.isMimeType("multipart/*")) {
                 Multipart mp = (Multipart) part.getContent();
-                StringBuilder sb = new StringBuilder();
+                String plainText = null;
+                String htmlText = null;
                 for (int i = 0; i < mp.getCount(); i++) {
-                    String text = extractText(mp.getBodyPart(i));
-                    if (text != null && !text.isEmpty()) {
-                        sb.append(text);
+                    BodyPart bp = mp.getBodyPart(i);
+                    if (bp.isMimeType("text/plain") && plainText == null) {
+                        try { plainText = extractText(bp); } catch (Exception ignore) {}
+                    } else if (bp.isMimeType("text/html") && htmlText == null) {
+                        try { htmlText = extractText(bp); } catch (Exception ignore) {}
+                    } else if (bp.isMimeType("multipart/*")) {
+                        String nested = extractText(bp);
+                        if (nested != null && !nested.isEmpty() && plainText == null) {
+                            plainText = nested;
+                        }
                     }
                 }
-                return sb.toString();
+                if (plainText != null && !plainText.isBlank()) return plainText;
+                if (htmlText != null && !htmlText.isBlank()) return htmlText;
             }
         } catch (IOException e) {
             log.warn("본문 추출 중 IO 오류: {}", e.getMessage());
         }
         return "";
+    }
+
+    private String stripHtml(String html) {
+        return html
+                .replaceAll("(?i)<style[^>]*>.*?</style>", "")
+                .replaceAll("(?i)<script[^>]*>.*?</script>", "")
+                .replaceAll("<[^>]+>", "")
+                .replace("&nbsp;", " ")
+                .replace("&lt;", "<")
+                .replace("&gt;", ">")
+                .replace("&amp;", "&")
+                .replace("&quot;", "\"")
+                .replaceAll("[ \\t]+", " ")
+                .replaceAll("(\\s*\\n){3,}", "\n\n")
+                .trim();
     }
 }

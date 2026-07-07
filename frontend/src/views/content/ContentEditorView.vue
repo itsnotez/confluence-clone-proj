@@ -26,6 +26,12 @@
     </div>
     <div class="editor-body">
       <TipTapEditor v-model="body" :readonly="false" />
+      <div class="attachment-section">
+        <AttachmentPanel v-if="currentContentId" :content-id="currentContentId" />
+        <div v-else class="attachment-pending">
+          첨부파일은 저장 후 등록할 수 있습니다.
+        </div>
+      </div>
     </div>
     <DxToast
       v-model:visible="toastVisible"
@@ -43,6 +49,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useContentStore } from '@/stores/content'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import TipTapEditor from '@/components/content/TipTapEditor.vue'
+import AttachmentPanel from '@/components/content/AttachmentPanel.vue'
 import { DxTextBox } from 'devextreme-vue/text-box'
 import { DxButton } from 'devextreme-vue/button'
 import { DxToast } from 'devextreme-vue/toast'
@@ -164,5 +171,16 @@ async function handlePublish() {
   flex: 1;
   overflow-y: auto;
   padding: 24px;
+}
+.attachment-section {
+  max-width: 860px;
+  margin: 0 auto;
+}
+.attachment-pending {
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+  font-size: 13px;
+  color: #aaa;
 }
 </style>

@@ -86,7 +86,7 @@ const editor = useEditor({
   extensions: [
     StarterKit,
     ResizableImage,
-    Link.configure({ openOnClick: false }),
+    Link.configure({ openOnClick: true, autolink: true, linkOnPaste: true }),
     Table.configure({ resizable: true }),
     TableRow,
     TableCell,
@@ -114,8 +114,15 @@ watch(() => props.readonly, (val) => {
 
 function setLink() {
   const url = window.prompt('URL 입력:')
-  if (url) {
-    editor.value?.chain().focus().setLink({ href: url }).run()
+  if (!url) return
+  const { empty } = editor.value.state.selection
+  if (empty) {
+    // 선택 텍스트 없음 → URL 자체를 링크 텍스트로 삽입
+    editor.value.chain().focus()
+      .insertContent(`<a href="${url}">${url}</a>`)
+      .run()
+  } else {
+    editor.value.chain().focus().setLink({ href: url }).run()
   }
 }
 
@@ -261,5 +268,13 @@ onBeforeUnmount(() => {
 .editor-content :deep(.ProseMirror th) {
   background: #f5f5f5;
   font-weight: 600;
+}
+.editor-content :deep(.ProseMirror a) {
+  color: #1976d2;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.editor-content :deep(.ProseMirror a:hover) {
+  color: #1251a3;
 }
 </style>

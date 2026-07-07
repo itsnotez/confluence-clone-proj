@@ -61,6 +61,7 @@ const contentStore = useContentStore()
 const spaceKey = route.params.spaceKey
 const routeContentId = route.params.contentId
 const isNew = !routeContentId || routeContentId === 'new'
+const parentId = route.query.parentId ? Number(route.query.parentId) : null
 
 const title = ref('')
 const body = ref('')
@@ -98,7 +99,8 @@ async function handleSave() {
       const created = await contentStore.createContent(spaceKey, {
         title: title.value,
         body: body.value,
-        type: 'PAGE'
+        type: 'PAGE',
+        ...(parentId !== null && { parentId })
       })
       currentContentId.value = created.id
       router.replace(`/spaces/${spaceKey}/contents/${created.id}/edit`)
@@ -125,7 +127,8 @@ async function handlePublish() {
       const created = await contentStore.createContent(spaceKey, {
         title: title.value,
         body: body.value,
-        type: 'PAGE'
+        type: 'PAGE',
+        ...(parentId !== null && { parentId })
       })
       targetId = created.id
       currentContentId.value = targetId

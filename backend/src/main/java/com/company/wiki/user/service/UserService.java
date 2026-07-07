@@ -72,6 +72,9 @@ public class UserService {
         if (req.role() != null) {
             user.setRole(req.role());
         }
+        if (req.password() != null && !req.password().isBlank()) {
+            user.setPassword(passwordEncoder.encode(req.password()));
+        }
 
         return UserDto.Response.from(user);
     }

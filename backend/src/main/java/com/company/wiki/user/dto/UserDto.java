@@ -25,7 +25,8 @@ public class UserDto {
     public record UpdateRequest(
             @Nullable String name,
             @Nullable @Email String email,
-            @Nullable String role
+            @Nullable String role,
+            @Nullable @Size(min = 8) String password
     ) {}
 
     public record Response(

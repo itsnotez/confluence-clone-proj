@@ -7,6 +7,7 @@ import com.company.wiki.space.dto.SpaceDto;
 import com.company.wiki.space.entity.Space;
 import com.company.wiki.space.entity.SpaceFavorite;
 import com.company.wiki.space.entity.SpaceFavoriteId;
+import com.company.wiki.permission.repository.SpacePermissionRepository;
 import com.company.wiki.space.repository.SpaceFavoriteRepository;
 import com.company.wiki.space.repository.SpaceRepository;
 import com.company.wiki.user.entity.User;
@@ -32,11 +33,27 @@ public class SpaceService {
     private final SpaceFavoriteRepository spaceFavoriteRepository;
     private final UserRepository userRepository;
     private final AuditLogService auditLogService;
+    private final SpacePermissionRepository spacePermissionRepository;
 
     @Transactional(readOnly = true)
     public List<SpaceDto.Response> findAll(Long currentUserId) {
+        User currentUser = userRepository.findById(currentUserId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        boolean isSiteAdmin = "SITE_ADMIN".equals(currentUser.getRole());
+
         return spaceRepository.findByStatusAndDeletedAtIsNull("ACTIVE")
                 .stream()
+                .filter(space -> {
+                    if ("PUBLIC".equals(space.getType())) return true;
+                    if (isSiteAdmin) return true;
+                    // PRIVATE: 해당 유저에게 명시적 권한이 있는지 확인
+                    return spacePermissionRepository
+                            .findBySpaceIdAndSubjectTypeAndSubjectId(space.getId(), "USER", currentUserId)
+                            .isPresent()
+                            || spacePermissionRepository
+                            .findBySpaceIdAndSubjectTypeAndSubjectIdIsNull(space.getId(), "ALL")
+                            .isPresent();
+                })
                 .map(space -> {
                     boolean favorited = spaceFavoriteRepository.existsByIdSpaceIdAndIdUserId(
                             space.getId(), currentUserId);

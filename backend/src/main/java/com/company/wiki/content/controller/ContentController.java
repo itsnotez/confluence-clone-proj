@@ -84,6 +84,16 @@ public class ContentController {
         return ResponseEntity.noContent().build();
     }
 
+    @PatchMapping("/contents/{id}/move")
+    public ApiResponse<ContentDto.Response> moveContent(
+            @PathVariable Long id,
+            @RequestBody ContentDto.MoveRequest req,
+            @AuthenticationPrincipal UserDetails principal) {
+        Long userId = getUserId(principal);
+        String role = getRole(principal);
+        return ApiResponse.ok(contentService.moveContent(id, req, userId, role));
+    }
+
     @GetMapping("/contents/{id}/versions")
     public ApiResponse<List<ContentDto.VersionResponse>> getVersions(
             @PathVariable Long id,

@@ -7,7 +7,7 @@
         <div v-if="spaceStore.currentSpace" class="space-info">
           <div class="space-title-row">
             <h2>{{ spaceStore.currentSpace.name }}</h2>
-            <RouterLink :to="`/spaces/${spaceKey}/permissions`" class="perm-link">권한 설정</RouterLink>
+            <RouterLink v-if="auth.user?.role === 'SITE_ADMIN'" :to="`/spaces/${spaceKey}/permissions`" class="perm-link">권한 설정</RouterLink>
           </div>
           <p v-if="spaceStore.currentSpace.description" class="space-desc">
             {{ spaceStore.currentSpace.description }}
@@ -36,6 +36,7 @@
 import { computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
 import { useSpaceStore } from '@/stores/space'
+import { useAuthStore } from '@/stores/auth'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import SpaceSidebar from '@/components/layout/SpaceSidebar.vue'
 import { DxList } from 'devextreme-vue/list'
@@ -43,6 +44,7 @@ import { DxList } from 'devextreme-vue/list'
 const route = useRoute()
 const router = useRouter()
 const spaceStore = useSpaceStore()
+const auth = useAuthStore()
 
 const spaceKey = computed(() => route.params.spaceKey)
 

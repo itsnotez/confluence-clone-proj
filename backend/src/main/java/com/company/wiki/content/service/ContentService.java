@@ -265,6 +265,79 @@ public class ContentService {
     }
 
     // -------------------------------------------------------
+    // 이동
+    // -------------------------------------------------------
+    public ContentDto.Response moveContent(Long contentId, ContentDto.MoveRequest req,
+                                           Long userId, String userRole) {
+        Content content = contentRepository.findByIdAndDeletedAtIsNull(contentId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.CONTENT_NOT_FOUND));
+
+        if (!permissionService.canWrite(content.getSpaceId(), userId, userRole, getUserGroupIds(userId))) {
+            throw new BusinessException(ErrorCode.PERMISSION_DENIED);
+        }
+
+        // Circular reference check
+        if (req.getParentId() != null) {
+            if (req.getParentId().equals(contentId)) {
+                throw new BusinessException(ErrorCode.INVALID_MOVE);
+            }
+            Long cursor = req.getParentId();
+            while (cursor != null) {
+                Content ancestor = contentRepository.findByIdAndDeletedAtIsNull(cursor).orElse(null);
+                if (ancestor == null) break;
+                if (ancestor.getId().equals(contentId)) {
+                    throw new BusinessException(ErrorCode.INVALID_MOVE);
+                }
+                cursor = ancestor.getParentId();
+            }
+        }
+
+        Long newParentId = req.getParentId();
+        int newPosition = req.getPosition();
+
+        // Shift siblings at destination to make room
+        List<Content> destSiblings = newParentId == null
+                ? contentRepository.findBySpaceIdAndParentIdIsNullAndDeletedAtIsNull(content.getSpaceId())
+                : contentRepository.findBySpaceIdAndParentIdAndDeletedAtIsNull(content.getSpaceId(), newParentId);
+
+        destSiblings.stream()
+                .filter(c -> !c.getId().equals(contentId) && c.getPosition() >= newPosition)
+                .forEach(c -> {
+                    c.setPosition(c.getPosition() + 1);
+                    contentRepository.save(c);
+                });
+
+        // Move the content
+        content.setParentId(newParentId);
+        content.setPosition(newPosition);
+        content = contentRepository.save(content);
+
+        // Compact positions in destination group to remove any gaps
+        compactPositions(content.getSpaceId(), newParentId);
+
+        String body = null;
+        if (content.getCurrentVersionId() != null) {
+            body = contentVersionRepository.findById(content.getCurrentVersionId())
+                    .map(ContentVersion::getBody).orElse(null);
+        }
+        return toResponse(content, body);
+    }
+
+    private void compactPositions(Long spaceId, Long parentId) {
+        List<Content> siblings = parentId == null
+                ? contentRepository.findBySpaceIdAndParentIdIsNullAndDeletedAtIsNull(spaceId)
+                : contentRepository.findBySpaceIdAndParentIdAndDeletedAtIsNull(spaceId, parentId);
+        siblings.sort(Comparator.comparingInt(Content::getPosition));
+        for (int i = 0; i < siblings.size(); i++) {
+            Content c = siblings.get(i);
+            if (c.getPosition() != i) {
+                c.setPosition(i);
+                contentRepository.save(c);
+            }
+        }
+    }
+
+    // -------------------------------------------------------
     // 버전 목록
     // -------------------------------------------------------
     @Transactional(readOnly = true)

@@ -164,9 +164,9 @@
           <label>이메일</label>
           <DxTextBox v-model:value="form.email" placeholder="user@company.com" />
         </div>
-        <div v-if="!editingUser" class="form-row">
-          <label>비밀번호</label>
-          <DxTextBox v-model:value="form.password" mode="password" placeholder="8자 이상" />
+        <div class="form-row">
+          <label>비밀번호{{ editingUser ? ' (변경 시에만 입력)' : '' }}</label>
+          <DxTextBox v-model:value="form.password" mode="password" :placeholder="editingUser ? '변경할 경우만 입력 (8자 이상)' : '8자 이상'" />
         </div>
         <div class="form-row">
           <label>역할</label>
@@ -289,10 +289,16 @@ async function submitForm() {
     formError.value = '로그인 ID와 비밀번호(8자 이상)를 입력하세요.'
     return
   }
+  if (editingUser.value && form.value.password && form.value.password.length < 8) {
+    formError.value = '비밀번호는 8자 이상이어야 합니다.'
+    return
+  }
   submitting.value = true
   try {
     if (editingUser.value) {
-      await userApi.update(editingUser.value.id, { name: form.value.name, email: form.value.email, role: form.value.role })
+      const updateData = { name: form.value.name, email: form.value.email, role: form.value.role }
+      if (form.value.password) updateData.password = form.value.password
+      await userApi.update(editingUser.value.id, updateData)
     } else {
       await userApi.create(form.value)
     }

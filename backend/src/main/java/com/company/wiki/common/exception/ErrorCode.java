@@ -23,6 +23,7 @@ public enum ErrorCode {
     GROUP_NOT_FOUND(HttpStatus.NOT_FOUND, "그룹을 찾을 수 없습니다."),
 
     PERMISSION_DENIED(HttpStatus.FORBIDDEN, "해당 콘텐츠에 대한 권한이 없습니다."),
+    INVALID_MOVE(HttpStatus.BAD_REQUEST, "순환 참조 또는 잘못된 이동입니다."),
 
     LABEL_NOT_FOUND(HttpStatus.NOT_FOUND, "라벨을 찾을 수 없습니다."),
     COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "댓글을 찾을 수 없습니다."),

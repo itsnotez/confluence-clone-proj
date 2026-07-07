@@ -71,6 +71,12 @@ public class ContentDto {
     }
 
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    public static class MoveRequest {
+        private Long parentId; // null = root
+        private int position;
+    }
+
+    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
     public static class VersionResponse {
         private Long id;
         private Long contentId;

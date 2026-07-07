@@ -7,9 +7,11 @@ import com.company.wiki.common.exception.BusinessException;
 import com.company.wiki.common.exception.ErrorCode;
 import com.company.wiki.content.entity.Content;
 import com.company.wiki.content.repository.ContentRepository;
+import com.company.wiki.notification.service.NotificationService;
 import com.company.wiki.permission.service.PermissionService;
 import com.company.wiki.user.repository.GroupMemberRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +19,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -26,6 +29,7 @@ public class CommentService {
     private final ContentRepository contentRepository;
     private final PermissionService permissionService;
     private final GroupMemberRepository groupMemberRepository;
+    private final NotificationService notificationService;
 
     private List<Long> getUserGroupIds(Long userId) {
         return groupMemberRepository.findByUserId(userId).stream()
@@ -82,6 +86,22 @@ public class CommentService {
                 .authorId(userId)
                 .build();
         comment = commentRepository.save(comment);
+
+        try {
+            Long contentAuthorId = content.getCreatedBy().getId();
+            if (!contentAuthorId.equals(userId)) { // 자기 글에 자기 댓글은 알림 제외
+                notificationService.create(
+                        contentAuthorId,
+                        "COMMENT",
+                        "새 댓글이 달렸습니다",
+                        content.getTitle() + "에 댓글이 달렸습니다.",
+                        "/spaces/" + content.getSpaceId() + "/contents/" + contentId
+                );
+            }
+        } catch (Exception e) {
+            log.warn("알림 생성 실패 (비중단): {}", e.getMessage());
+        }
+
         return buildCommentNode(comment, new HashMap<>());
     }
 

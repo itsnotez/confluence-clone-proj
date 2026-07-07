@@ -12,5 +12,7 @@ public interface MailAccountRepository extends JpaRepository<MailAccount, Long> 
 
     List<MailAccount> findBySyncStatus(String syncStatus);
 
+    long countBySyncStatus(String syncStatus);
+
     Optional<MailAccount> findByIdAndSpaceId(Long id, Long spaceId);
 }

@@ -53,6 +53,60 @@
           </template>
         </DxItem>
 
+        <DxItem title="유저 관리">
+          <template #default>
+            <div class="tab-content">
+              <div class="user-toolbar">
+                <DxButton text="+ 사용자 추가" type="default" @click="openCreateDialog" />
+              </div>
+              <DxDataGrid
+                :data-source="users"
+                :show-borders="true"
+                :hover-state-enabled="true"
+                :row-alternation-enabled="true"
+                height="calc(100vh - 260px)"
+              >
+                <DxSearchPanel :visible="true" placeholder="검색..." />
+                <DxColumn data-field="loginId" caption="로그인 ID" :width="140" />
+                <DxColumn data-field="name" caption="이름" :width="120" />
+                <DxColumn data-field="email" caption="이메일" />
+                <DxColumn
+                  caption="역할"
+                  :calculate-cell-value="(row) => row.role === 'SITE_ADMIN' ? '관리자' : '일반'"
+                  :width="80"
+                  alignment="center"
+                />
+                <DxColumn
+                  caption="상태"
+                  :calculate-cell-value="(row) => row.status === 'ACTIVE' ? '활성' : '비활성'"
+                  :width="80"
+                  alignment="center"
+                  cell-template="statusCell"
+                />
+                <DxColumn caption="생성일" data-field="createdAt" data-type="date" :width="120" />
+                <DxColumn caption="관리" cell-template="actionCell" :width="160" alignment="center" />
+                <template #statusCell="{ data }">
+                  <span :class="['status-badge', data.value === '활성' ? 'active' : 'inactive']">
+                    {{ data.value }}
+                  </span>
+                </template>
+                <template #actionCell="{ data }">
+                  <div class="action-btns">
+                    <DxButton text="수정" type="normal" styling-mode="outlined" @click="openEditDialog(data.data)" />
+                    <DxButton
+                      :text="data.data.status === 'ACTIVE' ? '비활성화' : '활성화'"
+                      type="normal"
+                      styling-mode="outlined"
+                      @click="toggleStatus(data.data)"
+                    />
+                  </div>
+                </template>
+                <DxPaging :page-size="20" />
+              </DxDataGrid>
+            </div>
+          </template>
+        </DxItem>
+
         <DxItem title="감사로그">
           <template #default>
             <div class="tab-content">
@@ -88,6 +142,48 @@
         </DxItem>
       </DxTabPanel>
     </div>
+
+    <!-- 사용자 추가/수정 다이얼로그 -->
+    <DxPopup
+      v-model:visible="dialogVisible"
+      :title="editingUser ? '사용자 수정' : '사용자 추가'"
+      :width="440"
+      :height="'auto'"
+      :show-close-button="true"
+    >
+      <div class="dialog-form">
+        <div v-if="!editingUser" class="form-row">
+          <label>로그인 ID</label>
+          <DxTextBox v-model:value="form.loginId" placeholder="예: hong.gildong" />
+        </div>
+        <div class="form-row">
+          <label>이름</label>
+          <DxTextBox v-model:value="form.name" placeholder="홍길동" />
+        </div>
+        <div class="form-row">
+          <label>이메일</label>
+          <DxTextBox v-model:value="form.email" placeholder="user@company.com" />
+        </div>
+        <div v-if="!editingUser" class="form-row">
+          <label>비밀번호</label>
+          <DxTextBox v-model:value="form.password" mode="password" placeholder="8자 이상" />
+        </div>
+        <div class="form-row">
+          <label>역할</label>
+          <DxSelectBox
+            v-model:value="form.role"
+            :items="roleOptions"
+            display-expr="label"
+            value-expr="value"
+          />
+        </div>
+        <div class="form-error" v-if="formError">{{ formError }}</div>
+        <div class="form-actions">
+          <DxButton text="취소" type="normal" styling-mode="outlined" @click="dialogVisible = false" />
+          <DxButton :text="editingUser ? '저장' : '추가'" type="default" :disabled="submitting" @click="submitForm" />
+        </div>
+      </div>
+    </DxPopup>
   </div>
 </template>
 
@@ -95,9 +191,14 @@
 import { ref, computed, onMounted } from 'vue'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import { adminApi } from '@/api/admin'
+import { userApi } from '@/api/user'
 import { DxTabPanel, DxItem } from 'devextreme-vue/tab-panel'
 import { DxPieChart, DxSeries } from 'devextreme-vue/pie-chart'
 import { DxDataGrid, DxColumn, DxPaging, DxFilterRow, DxSearchPanel } from 'devextreme-vue/data-grid'
+import { DxPopup } from 'devextreme-vue/popup'
+import { DxTextBox } from 'devextreme-vue/text-box'
+import { DxSelectBox } from 'devextreme-vue/select-box'
+import { DxButton } from 'devextreme-vue/button'
 
 const ACTION_LABELS = {
   ADMIN_ACCESS: '관리자 접속',
@@ -142,6 +243,79 @@ const auditLogs = ref([])
 const auditLogTotal = ref(0)
 const loading = ref(false)
 
+// 유저 관리
+const users = ref([])
+const dialogVisible = ref(false)
+const editingUser = ref(null)
+const submitting = ref(false)
+const formError = ref('')
+const roleOptions = [
+  { label: '일반', value: 'MEMBER' },
+  { label: '관리자', value: 'SITE_ADMIN' },
+]
+const emptyForm = () => ({ loginId: '', name: '', email: '', password: '', role: 'MEMBER' })
+const form = ref(emptyForm())
+
+async function loadUsers() {
+  try {
+    const res = await userApi.list()
+    users.value = res.data.data || []
+  } catch (e) {
+    console.error('유저 목록 조회 실패:', e)
+  }
+}
+
+function openCreateDialog() {
+  editingUser.value = null
+  form.value = emptyForm()
+  formError.value = ''
+  dialogVisible.value = true
+}
+
+function openEditDialog(user) {
+  editingUser.value = user
+  form.value = { loginId: user.loginId, name: user.name, email: user.email, password: '', role: user.role }
+  formError.value = ''
+  dialogVisible.value = true
+}
+
+async function submitForm() {
+  formError.value = ''
+  if (!form.value.name.trim() || !form.value.email.trim()) {
+    formError.value = '이름과 이메일은 필수입니다.'
+    return
+  }
+  if (!editingUser.value && (!form.value.loginId.trim() || form.value.password.length < 8)) {
+    formError.value = '로그인 ID와 비밀번호(8자 이상)를 입력하세요.'
+    return
+  }
+  submitting.value = true
+  try {
+    if (editingUser.value) {
+      await userApi.update(editingUser.value.id, { name: form.value.name, email: form.value.email, role: form.value.role })
+    } else {
+      await userApi.create(form.value)
+    }
+    dialogVisible.value = false
+    await loadUsers()
+  } catch (e) {
+    formError.value = e.response?.data?.message || '저장에 실패했습니다.'
+  } finally {
+    submitting.value = false
+  }
+}
+
+async function toggleStatus(user) {
+  if (user.status === 'ACTIVE') {
+    if (!confirm(`'${user.name}' 계정을 비활성화하시겠습니까?`)) return
+    await userApi.deactivate(user.id)
+  } else {
+    // 재활성화: role 유지하면서 PUT으로 status 변경은 별도 API 없으므로 임시 처리
+    await userApi.update(user.id, { name: user.name, email: user.email, role: user.role })
+  }
+  await loadUsers()
+}
+
 const mailStatusData = computed(() => {
   if (!stats.value) return []
   return [
@@ -172,6 +346,7 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
+  await loadUsers()
 })
 </script>
 
@@ -250,5 +425,53 @@ onMounted(async () => {
   margin: 0 0 12px;
   font-size: 16px;
   color: #333;
+}
+.user-toolbar {
+  margin-bottom: 12px;
+}
+.action-btns {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+.status-badge {
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+.status-badge.active {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+.status-badge.inactive {
+  background: #fce4ec;
+  color: #c62828;
+}
+.dialog-form {
+  padding: 8px 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.form-row label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #555;
+}
+.form-error {
+  color: #d32f2f;
+  font-size: 13px;
+}
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
 }
 </style>

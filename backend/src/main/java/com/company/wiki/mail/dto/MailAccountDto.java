@@ -50,6 +50,7 @@ public class MailAccountDto {
         private int imapPort;
         private boolean imapSsl;
         private String syncStatus;
+        private String lastErrorMessage;
         private LocalDateTime lastSyncedAt;
         private LocalDateTime createdAt;
 
@@ -62,6 +63,7 @@ public class MailAccountDto {
                     .imapPort(account.getImapPort())
                     .imapSsl(account.isImapSsl())
                     .syncStatus(account.getSyncStatus())
+                    .lastErrorMessage(account.getLastErrorMessage())
                     .lastSyncedAt(account.getLastSyncedAt())
                     .createdAt(account.getCreatedAt())
                     .build();

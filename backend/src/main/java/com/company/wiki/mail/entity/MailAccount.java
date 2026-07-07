@@ -45,6 +45,9 @@ public class MailAccount {
     @Column(name = "sync_status", length = 20)
     private String syncStatus;
 
+    @Column(name = "last_error_message", columnDefinition = "TEXT")
+    private String lastErrorMessage;
+
     @Column(name = "last_synced_at")
     private LocalDateTime lastSyncedAt;
 

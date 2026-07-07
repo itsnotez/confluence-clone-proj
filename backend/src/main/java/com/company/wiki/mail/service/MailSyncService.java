@@ -49,18 +49,21 @@ public class MailSyncService {
                 }
                 account.setSyncStatus("ACTIVE");
                 account.setLastSyncedAt(LocalDateTime.now());
+                account.setLastErrorMessage(null);
                 mailAccountRepository.save(account);
                 log.info("계정 {} 동기화 완료: {}건 저장", account.getEmailAddress(), saved);
                 return;
             } catch (Exception e) {
                 retries++;
+                String errorMsg = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
                 log.error("동기화 실패 ({}/3) — 계정: {}, 오류: {}",
-                        retries, account.getEmailAddress(), e.getMessage());
+                        retries, account.getEmailAddress(), errorMsg);
                 if (retries >= 3) {
                     account.setSyncStatus("DISABLED");
                 } else {
                     account.setSyncStatus("ERROR");
                 }
+                account.setLastErrorMessage(errorMsg);
                 mailAccountRepository.save(account);
             }
         }

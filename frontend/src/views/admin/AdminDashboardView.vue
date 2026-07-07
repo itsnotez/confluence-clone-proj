@@ -158,20 +158,34 @@
                     alignment="center"
                     cell-template="syncStatusCell"
                   />
+                  <DxColumn caption="오류 내용" data-field="lastErrorMessage" cell-template="errorMsgCell" />
                   <DxColumn data-field="lastSyncedAt" caption="마지막 동기화" data-type="datetime" :width="170" />
-                  <DxColumn caption="관리" :width="90" alignment="center" cell-template="mailActionCell" />
+                  <DxColumn caption="관리" :width="160" alignment="center" cell-template="mailActionCell" />
                   <template #syncStatusCell="{ data }">
-                    <span :class="['status-badge', data.value === 'OK' ? 'active' : data.value === 'ERROR' ? 'inactive' : 'pending']">
-                      {{ data.value === 'OK' ? '정상' : data.value === 'ERROR' ? '오류' : '대기' }}
+                    <span :class="['status-badge', syncBadgeClass(data.value)]">
+                      {{ syncStatusLabel(data.value) }}
                     </span>
                   </template>
+                  <template #errorMsgCell="{ data }">
+                    <span v-if="data.value" class="error-msg" :title="data.value">{{ data.value }}</span>
+                    <span v-else class="no-error">-</span>
+                  </template>
                   <template #mailActionCell="{ data }">
-                    <DxButton
-                      text="삭제"
-                      type="danger"
-                      styling-mode="outlined"
-                      @click="deleteMailAccount(data.data)"
-                    />
+                    <div class="action-btns">
+                      <DxButton
+                        text="동기화"
+                        type="normal"
+                        styling-mode="outlined"
+                        :disabled="syncingIds.has(data.data.id)"
+                        @click="triggerSync(data.data)"
+                      />
+                      <DxButton
+                        text="삭제"
+                        type="danger"
+                        styling-mode="outlined"
+                        @click="deleteMailAccount(data.data)"
+                      />
+                    </div>
                   </template>
                   <DxPaging :page-size="20" />
                 </DxDataGrid>
@@ -520,6 +534,33 @@ async function submitMailAccount() {
   }
 }
 
+const syncingIds = ref(new Set())
+
+function syncStatusLabel(status) {
+  const map = { ACTIVE: '정상', ERROR: '오류', DISABLED: '비활성', PENDING: '대기' }
+  return map[status] || status
+}
+
+function syncBadgeClass(status) {
+  if (status === 'ACTIVE') return 'active'
+  if (status === 'ERROR' || status === 'DISABLED') return 'inactive'
+  return 'pending'
+}
+
+async function triggerSync(account) {
+  syncingIds.value = new Set([...syncingIds.value, account.id])
+  try {
+    await mailAccountApi.syncAccount(mailSelectedSpaceKey.value, account.id)
+    await onSpaceSelected()
+  } catch (e) {
+    alert(e.response?.data?.message || '동기화 요청에 실패했습니다.')
+  } finally {
+    const next = new Set(syncingIds.value)
+    next.delete(account.id)
+    syncingIds.value = next
+  }
+}
+
 async function deleteMailAccount(account) {
   if (!confirm(`'${account.emailAddress}' 계정을 삭제하시겠습니까?`)) return
   try {
@@ -726,5 +767,19 @@ onMounted(async () => {
 .status-badge.pending {
   background: #fff8e1;
   color: #f57f17;
+}
+.error-msg {
+  font-size: 12px;
+  color: #c62828;
+  display: block;
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: help;
+}
+.no-error {
+  color: #bbb;
+  font-size: 12px;
 }
 </style>

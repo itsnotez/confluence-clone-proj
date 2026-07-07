@@ -2,7 +2,10 @@ package com.company.wiki.mail.controller;
 
 import com.company.wiki.common.response.ApiResponse;
 import com.company.wiki.mail.dto.MailAccountDto;
+import com.company.wiki.mail.entity.MailAccount;
+import com.company.wiki.mail.repository.MailAccountRepository;
 import com.company.wiki.mail.service.MailAccountService;
+import com.company.wiki.mail.service.MailSyncService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +21,8 @@ import java.util.List;
 public class MailAccountController {
 
     private final MailAccountService mailAccountService;
+    private final MailSyncService mailSyncService;
+    private final MailAccountRepository mailAccountRepository;
 
     private Long getUserId(UserDetails principal) {
         return Long.parseLong(principal.getUsername());
@@ -49,6 +54,17 @@ public class MailAccountController {
                 getRole(currentUser),
                 getGroupIds());
         return ResponseEntity.ok(ApiResponse.ok(response));
+    }
+
+    @PostMapping("/{id}/sync")
+    public ResponseEntity<ApiResponse<MailAccountDto.Response>> syncMailAccount(
+            @PathVariable String spaceKey,
+            @PathVariable Long id) {
+        MailAccount account = mailAccountRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("계정을 찾을 수 없습니다."));
+        mailSyncService.syncAccount(account);
+        MailAccount updated = mailAccountRepository.findById(id).orElse(account);
+        return ResponseEntity.ok(ApiResponse.ok(MailAccountDto.Response.from(updated)));
     }
 
     @DeleteMapping("/{id}")

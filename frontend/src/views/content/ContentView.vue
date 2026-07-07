@@ -40,6 +40,7 @@
             :model-value="contentStore.currentContent.body"
             :readonly="true"
           />
+          <AttachmentPanel :content-id="contentStore.currentContent?.id" :readonly="true" />
           <div class="label-panel">
             <p class="label-title">라벨</p>
             <div v-if="labels.length === 0" class="label-empty">라벨 없음</div>
@@ -67,7 +68,6 @@
             </div>
           </div>
           <CommentPanel :content-id="contentStore.currentContent?.id" />
-          <AttachmentPanel :content-id="contentStore.currentContent?.id" :readonly="true" />
         </div>
         <div v-else class="empty-state">
           <p>콘텐츠를 불러올 수 없습니다.</p>

@@ -30,11 +30,28 @@
 
 <script setup>
 import { onBeforeUnmount, watch, ref } from 'vue'
-import { useEditor, EditorContent } from '@tiptap/vue-3'
+import { useEditor, EditorContent, VueNodeViewRenderer } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'
 import Link from '@tiptap/extension-link'
 import { Table, TableRow, TableCell, TableHeader } from '@tiptap/extension-table'
+import ResizableImageView from './ResizableImageView.vue'
+
+const ResizableImage = Image.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      width: {
+        default: null,
+        parseHTML: el => el.style.width || el.getAttribute('width') || null,
+        renderHTML: attrs => attrs.width ? { style: `width: ${attrs.width}; max-width: 100%; height: auto;` } : {},
+      },
+    }
+  },
+  addNodeView() {
+    return VueNodeViewRenderer(ResizableImageView)
+  },
+})
 
 const props = defineProps({
   modelValue: {
@@ -62,7 +79,7 @@ const editor = useEditor({
   editable: !props.readonly,
   extensions: [
     StarterKit,
-    Image,
+    ResizableImage,
     Link.configure({ openOnClick: false }),
     Table.configure({ resizable: true }),
     TableRow,

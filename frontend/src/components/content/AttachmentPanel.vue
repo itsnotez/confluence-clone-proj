@@ -2,7 +2,7 @@
   <div class="attachment-panel">
     <h3 class="panel-title">첨부파일</h3>
     <input type="file" ref="fileInputRef" style="display:none" @change="onFileChange" />
-    <div class="panel-toolbar">
+    <div v-if="!readonly" class="panel-toolbar">
       <DxButton text="파일 업로드" type="default" styling-mode="outlined" :disabled="uploading" @click="triggerUpload" />
       <span v-if="uploading" class="uploading-text">업로드 중...</span>
     </div>
@@ -28,7 +28,8 @@ import { attachmentApi } from '@/api/attachment'
 import { DxButton } from 'devextreme-vue/button'
 
 const props = defineProps({
-  contentId: { type: Number, default: null }
+  contentId: { type: Number, default: null },
+  readonly: { type: Boolean, default: false }
 })
 
 const attachments = ref([])

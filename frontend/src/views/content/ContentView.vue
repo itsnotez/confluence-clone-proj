@@ -67,6 +67,7 @@
             </div>
           </div>
           <CommentPanel :content-id="contentStore.currentContent?.id" />
+          <AttachmentPanel :content-id="contentStore.currentContent?.id" :readonly="true" />
         </div>
         <div v-else class="empty-state">
           <p>콘텐츠를 불러올 수 없습니다.</p>
@@ -89,6 +90,7 @@ import SpaceSidebar from '@/components/layout/SpaceSidebar.vue'
 import TipTapEditor from '@/components/content/TipTapEditor.vue'
 import VersionHistoryPanel from '@/components/content/VersionHistoryPanel.vue'
 import CommentPanel from '@/components/content/CommentPanel.vue'
+import AttachmentPanel from '@/components/content/AttachmentPanel.vue'
 import { DxButton } from 'devextreme-vue/button'
 import { DxLoadIndicator } from 'devextreme-vue/load-indicator'
 import { DxSelectBox } from 'devextreme-vue/select-box'

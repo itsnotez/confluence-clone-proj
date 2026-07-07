@@ -1,5 +1,5 @@
 <template>
-  <div class="attachment-panel">
+  <div v-if="!readonly || loading || attachments.length > 0" class="attachment-panel">
     <h3 class="panel-title">첨부파일</h3>
     <input type="file" ref="fileInputRef" style="display:none" @change="onFileChange" />
     <div v-if="!readonly" class="panel-toolbar">

@@ -10,8 +10,9 @@ import { useNotificationStore } from '@/stores/notification'
 const auth = useAuthStore()
 const notif = useNotificationStore()
 
-onMounted(() => {
+onMounted(async () => {
   if (auth.isLoggedIn) {
+    await auth.fetchMe()
     notif.startPolling()
   }
 })

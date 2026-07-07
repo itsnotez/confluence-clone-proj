@@ -20,10 +20,13 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
   const auth = useAuthStore()
   if (!to.meta.public && !auth.isLoggedIn) return '/login'
   if (to.meta.requiresAdmin) {
+    if (auth.isLoggedIn && !auth.user) {
+      await auth.fetchMe()
+    }
     if (!auth.user || auth.user.role !== 'SITE_ADMIN') return '/spaces'
   }
 })

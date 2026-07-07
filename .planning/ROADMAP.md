@@ -93,7 +93,7 @@ Wave 2 *(blocked on Wave 1 completion)*:
 - [x] 04-04-PLAN.md — 알림 조회/읽음처리 API (NotificationController: GET /notifications, PATCH read/read-all)
 
 Wave 3 *(blocked on Wave 2 completion)*:
-- [ ] 04-05-PLAN.md — 관리자 대시보드 프론트엔드 (AdminDashboardView.vue: DxTabPanel + DxChart + DxDataGrid)
+- [x] 04-05-PLAN.md — 관리자 대시보드 프론트엔드 (AdminDashboardView.vue: DxTabPanel + DxChart + DxDataGrid)
 - [ ] 04-06-PLAN.md — 알림 프론트엔드 (AppHeader 알림 벨 + 드롭다운 + Pinia 스토어 폴링)
 
 ### Phase 5: 성능·보안·UAT
@@ -109,5 +109,5 @@ Wave 3 *(blocked on Wave 2 completion)*:
 | 1. 핵심 기능 | 7/7 | Complete | 2026-07-06 |
 | 2. 메일 연동 | 4/4 | Complete | 2026-07-06 |
 | 3. 검색·첨부 | 6/6 | Complete | 2026-07-07 |
-| 4. 관리자·알림 | 4/6 | In Progress|  |
+| 4. 관리자·알림 | 5/6 | In Progress|  |
 | 5. 성능·UAT | TBD | Not started | - |

@@ -11,6 +11,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -140,13 +143,10 @@ public class ImapService {
     private String extractText(Part part) throws MessagingException {
         try {
             if (part.isMimeType("text/plain")) {
-                Object content = part.getContent();
-                return content != null ? content.toString() : "";
+                return readPartAsString(part);
             }
             if (part.isMimeType("text/html")) {
-                Object content = part.getContent();
-                if (content == null) return "";
-                return stripHtml(content.toString());
+                return stripHtml(readPartAsString(part));
             }
             if (part.isMimeType("multipart/*")) {
                 Multipart mp = (Multipart) part.getContent();
@@ -159,10 +159,12 @@ public class ImapService {
                     } else if (bp.isMimeType("text/html") && htmlText == null) {
                         try { htmlText = extractText(bp); } catch (Exception ignore) {}
                     } else if (bp.isMimeType("multipart/*")) {
-                        String nested = extractText(bp);
-                        if (nested != null && !nested.isEmpty() && plainText == null) {
-                            plainText = nested;
-                        }
+                        try {
+                            String nested = extractText(bp);
+                            if (nested != null && !nested.isBlank() && plainText == null) {
+                                plainText = nested;
+                            }
+                        } catch (Exception ignore) {}
                     }
                 }
                 if (plainText != null && !plainText.isBlank()) return plainText;
@@ -174,10 +176,41 @@ public class ImapService {
         return "";
     }
 
+    /**
+     * Part 내용을 String으로 읽는다.
+     * getContent()가 InputStream을 반환하는 경우(base64/qp 등) 직접 읽는다.
+     */
+    private String readPartAsString(Part part) throws MessagingException, IOException {
+        Object content = part.getContent();
+        if (content instanceof String s) {
+            return s;
+        }
+        if (content instanceof InputStream is) {
+            Charset charset = detectCharset(part.getContentType());
+            byte[] bytes = is.readAllBytes();
+            return new String(bytes, charset);
+        }
+        return content != null ? content.toString() : "";
+    }
+
+    private Charset detectCharset(String contentType) {
+        if (contentType != null) {
+            for (String token : contentType.split(";")) {
+                String t = token.trim();
+                if (t.toLowerCase().startsWith("charset=")) {
+                    String name = t.substring(8).trim().replace("\"", "");
+                    try { return Charset.forName(name); } catch (Exception ignore) {}
+                }
+            }
+        }
+        return StandardCharsets.UTF_8;
+    }
+
     private String stripHtml(String html) {
+        if (html == null || html.isBlank()) return "";
         return html
-                .replaceAll("(?i)<style[^>]*>.*?</style>", "")
-                .replaceAll("(?i)<script[^>]*>.*?</script>", "")
+                .replaceAll("(?si)<style[^>]*>.*?</style>", "")
+                .replaceAll("(?si)<script[^>]*>.*?</script>", "")
                 .replaceAll("<[^>]+>", "")
                 .replace("&nbsp;", " ")
                 .replace("&lt;", "<")

@@ -19,8 +19,10 @@
         :hover-state-enabled="true"
         :row-alternation-enabled="true"
         key-expr="spaceKey"
+        :selected-row-keys="selectedKeys"
         @row-click="onRowClick"
       >
+        <DxSelection mode="single" />
         <DxColumn data-field="spaceKey" caption="키" :width="120" />
         <DxColumn data-field="name" caption="Space 이름" />
         <DxColumn data-field="type" caption="유형" :width="100" />
@@ -101,7 +103,7 @@ import { useRouter } from 'vue-router'
 import { useSpaceStore } from '@/stores/space'
 import { useAuthStore } from '@/stores/auth'
 import AppHeader from '@/components/layout/AppHeader.vue'
-import { DxDataGrid, DxColumn } from 'devextreme-vue/data-grid'
+import { DxDataGrid, DxColumn, DxSelection } from 'devextreme-vue/data-grid'
 import { DxPopup } from 'devextreme-vue/popup'
 import { DxForm, DxSimpleItem, DxRequiredRule } from 'devextreme-vue/form'
 import { DxButton } from 'devextreme-vue/button'
@@ -110,6 +112,7 @@ const router = useRouter()
 const spaceStore = useSpaceStore()
 const auth = useAuthStore()
 const showCreateDialog = ref(false)
+const selectedKeys = ref([])
 
 const createForm = reactive({
   spaceKey: '',
@@ -123,6 +126,7 @@ onMounted(() => {
 })
 
 function onRowClick(e) {
+  selectedKeys.value = [e.data.spaceKey]
   router.push(`/spaces/${e.data.spaceKey}`)
 }
 
@@ -178,5 +182,21 @@ function closeDialog() {
   justify-content: flex-end;
   gap: 8px;
   margin-top: 16px;
+}
+
+:deep(.dx-datagrid .dx-row) {
+  cursor: pointer;
+}
+:deep(.dx-datagrid .dx-state-hover td) {
+  background-color: #e8f0fe !important;
+  color: #1a237e;
+}
+:deep(.dx-datagrid .dx-selection td),
+:deep(.dx-datagrid .dx-selection.dx-row:not(.dx-row-lines) td) {
+  background-color: #1976d2 !important;
+  color: #fff !important;
+}
+:deep(.dx-datagrid .dx-selection td .dx-button-text) {
+  color: #fff;
 }
 </style>

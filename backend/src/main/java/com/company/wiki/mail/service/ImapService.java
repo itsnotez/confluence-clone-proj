@@ -10,6 +10,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import jakarta.mail.internet.MimeMessage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -59,7 +62,7 @@ public class ImapService {
             store.connect(account.getImapHost(), account.getEmailAddress(), password);
 
             inbox = store.getFolder("INBOX");
-            inbox.open(Folder.READ_ONLY);
+            inbox.open(Folder.READ_WRITE);
 
             Message[] messages = inbox.getMessages();
             if (messages.length == 0) {
@@ -69,12 +72,11 @@ public class ImapService {
             int start = Math.max(1, messages.length - maxFetch + 1);
             Message[] recent = inbox.getMessages(start, messages.length);
 
-            // 본문을 포함해 한 번에 pre-fetch (lazy fetch 방지)
+            // ENVELOPE + UID pre-fetch (CONTENT_INFO는 BODYSTRUCTURE를 캐시해
+            // 이후 BODY[] 실제 fetch를 방해하므로 제외)
             FetchProfile fp = new FetchProfile();
             fp.add(FetchProfile.Item.ENVELOPE);
-            fp.add(FetchProfile.Item.CONTENT_INFO);
             fp.add(UIDFolder.FetchProfileItem.UID);
-            fp.add("X-mailer");
             inbox.fetch(recent, fp);
 
             List<MailMessage> result = new ArrayList<>();
@@ -86,7 +88,7 @@ public class ImapService {
                     LocalDateTime received = msg.getReceivedDate() != null
                             ? msg.getReceivedDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
                             : LocalDateTime.now();
-                    String body = extractText(msg);
+                    String body = extractTextFull(msg);
 
                     result.add(MailMessage.builder()
                             .mailAccountId(account.getId())
@@ -120,6 +122,20 @@ public class ImapService {
             } catch (MessagingException ignore) {
                 // 닫기 실패는 무시
             }
+        }
+    }
+
+    /**
+     * 메시지 본문을 강제로 추출한다.
+     * writeTo()는 IMAP 캐시 미적재 시 0 바이트를 쓰므로 사용하지 않는다.
+     * getContent()/getInputStream() 조합으로 직접 추출한다.
+     */
+    private String extractTextFull(Message msg) {
+        try {
+            return extractText(msg);
+        } catch (Exception e) {
+            log.warn("본문 추출 실패: {}", e.getMessage());
+            return "";
         }
     }
 
@@ -192,19 +208,29 @@ public class ImapService {
 
     /**
      * Part 내용을 String으로 읽는다.
-     * getContent()가 InputStream을 반환하는 경우(base64/qp 등) 직접 읽는다.
+     * getContent()가 빈 결과를 줄 경우 getInputStream()으로 직접 읽는다.
+     * (IMAP lazy-fetch 환경에서 base64/QP 인코딩 처리)
      */
     private String readPartAsString(Part part) throws MessagingException, IOException {
-        Object content = part.getContent();
-        if (content instanceof String s) {
-            return s;
+        Charset charset = detectCharset(part.getContentType());
+        // 1차: getContent() 시도
+        try {
+            Object content = part.getContent();
+            if (content instanceof String s && !s.isBlank()) {
+                return s;
+            }
+            if (content instanceof InputStream is) {
+                byte[] bytes = is.readAllBytes();
+                if (bytes.length > 0) return new String(bytes, charset);
+            }
+        } catch (Exception e) {
+            log.warn("getContent 예외 (Part contentType={}): {} — {}", part.getContentType(), e.getClass().getSimpleName(), e.getMessage());
         }
-        if (content instanceof InputStream is) {
-            Charset charset = detectCharset(part.getContentType());
+        // 2차: getInputStream() — transfer-encoding 디코딩 후 raw bytes
+        try (InputStream is = part.getInputStream()) {
             byte[] bytes = is.readAllBytes();
             return new String(bytes, charset);
         }
-        return content != null ? content.toString() : "";
     }
 
     private Charset detectCharset(String contentType) {

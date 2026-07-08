@@ -85,6 +85,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useMailStore } from '@/stores/mail'
+import { useSpaceStore } from '@/stores/space'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import SpaceSidebar from '@/components/layout/SpaceSidebar.vue'
 import { DxDataGrid, DxColumn, DxPaging, DxSelection } from 'devextreme-vue/data-grid'
@@ -94,6 +95,7 @@ import notify from 'devextreme/ui/notify'
 
 const route = useRoute()
 const mailStore = useMailStore()
+const spaceStore = useSpaceStore()
 
 const spaceKey = computed(() => route.params.spaceKey)
 const selectedAccountId = ref(null)
@@ -128,6 +130,7 @@ async function handleConvert(msg) {
   converting.value = true
   try {
     const result = await mailStore.convertToPage(spaceKey.value, selectedAccountId.value, msg.id)
+    await spaceStore.fetchContentTree(spaceKey.value)
     notify({ message: result.message || '페이지 변환 성공', type: 'success', displayTime: 3000 })
   } catch (e) {
     const errMsg = e.response?.status === 409 ? '이미 변환된 메일입니다' : '변환 실패'

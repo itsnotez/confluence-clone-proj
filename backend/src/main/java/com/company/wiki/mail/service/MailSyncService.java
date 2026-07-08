@@ -2,8 +2,11 @@ package com.company.wiki.mail.service;
 
 import com.company.wiki.mail.entity.MailAccount;
 import com.company.wiki.mail.entity.MailMessage;
+import com.company.wiki.mail.entity.MailMessageAttachment;
 import com.company.wiki.mail.repository.MailAccountRepository;
+import com.company.wiki.mail.repository.MailMessageAttachmentRepository;
 import com.company.wiki.mail.repository.MailMessageRepository;
+import com.company.wiki.mail.service.ImapService.FetchedMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,6 +24,7 @@ public class MailSyncService {
     private final ImapService imapService;
     private final MailAccountRepository mailAccountRepository;
     private final MailMessageRepository mailMessageRepository;
+    private final MailMessageAttachmentRepository mailMessageAttachmentRepository;
 
     /**
      * 단일 메일 계정의 신규 메시지를 동기화한다.
@@ -38,9 +42,11 @@ public class MailSyncService {
         int retries = 0;
         while (retries < 3) {
             try {
-                List<MailMessage> fetched = imapService.fetchNewMessages(account, 50);
+                List<FetchedMessage> fetched = imapService.fetchNewMessages(account, 50);
                 int saved = 0;
-                for (MailMessage msg : fetched) {
+                for (FetchedMessage fetched1 : fetched) {
+                    MailMessage msg = fetched1.message();
+                    List<MailMessageAttachment> attachments = fetched1.attachments();
                     mailMessageRepository
                             .findByMailAccountIdAndMessageUid(account.getId(), msg.getMessageUid())
                             .ifPresentOrElse(existing -> {
@@ -50,9 +56,22 @@ public class MailSyncService {
                                     existing.setSender(msg.getSender());
                                     existing.setSubject(msg.getSubject());
                                     mailMessageRepository.save(existing);
+                                    // 첨부파일이 아직 없는 경우에만 저장 (중복 방지)
+                                    if (!attachments.isEmpty()) {
+                                        List<MailMessageAttachment> existingAttachments =
+                                                mailMessageAttachmentRepository.findByMailMessageId(existing.getId());
+                                        if (existingAttachments.isEmpty()) {
+                                            attachments.forEach(a -> a.setMailMessageId(existing.getId()));
+                                            mailMessageAttachmentRepository.saveAll(attachments);
+                                        }
+                                    }
                                 }
                             }, () -> {
-                                mailMessageRepository.save(msg);
+                                MailMessage savedMsg = mailMessageRepository.save(msg);
+                                if (!attachments.isEmpty()) {
+                                    attachments.forEach(a -> a.setMailMessageId(savedMsg.getId()));
+                                    mailMessageAttachmentRepository.saveAll(attachments);
+                                }
                             });
                     saved++;
                 }

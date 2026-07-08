@@ -3,7 +3,9 @@ package com.company.wiki.mail.service;
 import com.company.wiki.mail.entity.MailAccount;
 import com.company.wiki.mail.entity.MailMessage;
 import com.company.wiki.mail.repository.MailAccountRepository;
+import com.company.wiki.mail.repository.MailMessageAttachmentRepository;
 import com.company.wiki.mail.repository.MailMessageRepository;
+import com.company.wiki.mail.service.ImapService.FetchedMessage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -28,6 +31,9 @@ class MailSyncServiceTest {
 
     @Mock
     private MailMessageRepository mailMessageRepository;
+
+    @Mock
+    private MailMessageAttachmentRepository mailMessageAttachmentRepository;
 
     @InjectMocks
     private MailSyncService mailSyncService;
@@ -63,9 +69,11 @@ class MailSyncServiceTest {
         MailMessage msg1 = buildMessage("1");
         MailMessage msg2 = buildMessage("2");
 
-        when(imapService.fetchNewMessages(account, 50)).thenReturn(List.of(msg1, msg2));
-        when(mailMessageRepository.existsByMailAccountIdAndMessageUid(1L, "1")).thenReturn(false);
-        when(mailMessageRepository.existsByMailAccountIdAndMessageUid(1L, "2")).thenReturn(false);
+        when(imapService.fetchNewMessages(account, 50)).thenReturn(
+                List.of(new FetchedMessage(msg1, List.of()), new FetchedMessage(msg2, List.of())));
+        when(mailMessageRepository.findByMailAccountIdAndMessageUid(1L, "1")).thenReturn(Optional.empty());
+        when(mailMessageRepository.findByMailAccountIdAndMessageUid(1L, "2")).thenReturn(Optional.empty());
+        when(mailMessageRepository.save(any(MailMessage.class))).thenAnswer(inv -> inv.getArgument(0));
 
         // when
         mailSyncService.syncAccount(account);
@@ -84,9 +92,12 @@ class MailSyncServiceTest {
         // given
         MailAccount account = testAccount();
         MailMessage msg1 = buildMessage("1");
+        MailMessage existing = buildMessage("1");
+        existing.setBodyText("기존 본문");
 
-        when(imapService.fetchNewMessages(account, 50)).thenReturn(List.of(msg1));
-        when(mailMessageRepository.existsByMailAccountIdAndMessageUid(1L, "1")).thenReturn(true);
+        when(imapService.fetchNewMessages(account, 50)).thenReturn(
+                List.of(new FetchedMessage(msg1, List.of())));
+        when(mailMessageRepository.findByMailAccountIdAndMessageUid(1L, "1")).thenReturn(Optional.of(existing));
 
         // when
         mailSyncService.syncAccount(account);

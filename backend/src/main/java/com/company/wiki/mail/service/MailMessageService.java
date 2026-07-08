@@ -6,10 +6,13 @@ import com.company.wiki.content.entity.Content;
 import com.company.wiki.content.entity.ContentVersion;
 import com.company.wiki.content.repository.ContentRepository;
 import com.company.wiki.content.repository.ContentVersionRepository;
+import com.company.wiki.mail.dto.MailAttachmentDto;
 import com.company.wiki.mail.dto.MailMessageDto;
 import com.company.wiki.mail.entity.MailAccount;
 import com.company.wiki.mail.entity.MailMessage;
+import com.company.wiki.mail.entity.MailMessageAttachment;
 import com.company.wiki.mail.repository.MailAccountRepository;
+import com.company.wiki.mail.repository.MailMessageAttachmentRepository;
 import com.company.wiki.mail.repository.MailMessageRepository;
 import com.company.wiki.permission.service.PermissionService;
 import com.company.wiki.space.entity.Space;
@@ -32,6 +35,7 @@ public class MailMessageService {
 
     private final MailMessageRepository mailMessageRepository;
     private final MailAccountRepository mailAccountRepository;
+    private final MailMessageAttachmentRepository mailMessageAttachmentRepository;
     private final ContentRepository contentRepository;
     private final ContentVersionRepository contentVersionRepository;
     private final SpaceRepository spaceRepository;
@@ -141,5 +145,63 @@ public class MailMessageService {
         log.info("메일 메시지 [{}] → 페이지 [{}] 변환 완료", msgId, content.getId());
 
         return new MailMessageDto.ConvertResponse(content.getId(), content.getTitle(), "메일이 페이지로 변환되었습니다");
+    }
+
+    /**
+     * 첨부파일 메타 목록 조회 (파일 데이터 제외)
+     */
+    @Transactional(readOnly = true)
+    public List<MailAttachmentDto.Meta> getAttachmentMeta(
+            String spaceKey, Long accountId, Long msgId, Long userId, String userRole, List<Long> groupIds) {
+
+        Space space = spaceRepository.findBySpaceKeyAndDeletedAtIsNull(spaceKey)
+                .orElseThrow(() -> new BusinessException(ErrorCode.SPACE_NOT_FOUND));
+
+        String permission = permissionService.resolveSpacePermission(space.getId(), userId, groupIds);
+        if ("NONE".equals(permission) && !"SITE_ADMIN".equals(userRole)) {
+            throw new BusinessException(ErrorCode.PERMISSION_DENIED);
+        }
+
+        mailAccountRepository.findByIdAndSpaceId(accountId, space.getId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.MAIL_ACCOUNT_NOT_FOUND));
+
+        mailMessageRepository.findByIdAndMailAccountId(msgId, accountId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.MAIL_MESSAGE_NOT_FOUND));
+
+        return mailMessageAttachmentRepository.findMetaByMailMessageId(msgId)
+                .stream()
+                .map(row -> MailAttachmentDto.Meta.builder()
+                        .id((Long) row[0])
+                        .fileName((String) row[1])
+                        .contentType((String) row[2])
+                        .fileSize((Long) row[3])
+                        .build())
+                .toList();
+    }
+
+    /**
+     * 첨부파일 다운로드용 엔티티 조회
+     */
+    @Transactional(readOnly = true)
+    public MailMessageAttachment downloadAttachment(
+            String spaceKey, Long accountId, Long msgId, Long attachId, Long userId, String userRole, List<Long> groupIds) {
+
+        Space space = spaceRepository.findBySpaceKeyAndDeletedAtIsNull(spaceKey)
+                .orElseThrow(() -> new BusinessException(ErrorCode.SPACE_NOT_FOUND));
+
+        String permission = permissionService.resolveSpacePermission(space.getId(), userId, groupIds);
+        if ("NONE".equals(permission) && !"SITE_ADMIN".equals(userRole)) {
+            throw new BusinessException(ErrorCode.PERMISSION_DENIED);
+        }
+
+        mailAccountRepository.findByIdAndSpaceId(accountId, space.getId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.MAIL_ACCOUNT_NOT_FOUND));
+
+        mailMessageRepository.findByIdAndMailAccountId(msgId, accountId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.MAIL_MESSAGE_NOT_FOUND));
+
+        return mailMessageAttachmentRepository.findById(attachId)
+                .filter(a -> a.getMailMessageId().equals(msgId))
+                .orElseThrow(() -> new BusinessException(ErrorCode.ATTACHMENT_NOT_FOUND));
     }
 }

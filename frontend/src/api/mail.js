@@ -10,4 +10,9 @@ export const mailAccountApi = {
 export const mailMessageApi = {
   getMessages: (spaceKey, accountId) => api.get(`/spaces/${spaceKey}/mail-accounts/${accountId}/messages`),
   convertToPage: (spaceKey, accountId, msgId) => api.post(`/spaces/${spaceKey}/mail-accounts/${accountId}/messages/${msgId}/convert`),
+  getAttachments: (spaceKey, accountId, msgId) =>
+    api.get(`/spaces/${spaceKey}/mail-accounts/${accountId}/messages/${msgId}/attachments`),
+  downloadAttachment: (spaceKey, accountId, msgId, attachId) =>
+    api.get(`/spaces/${spaceKey}/mail-accounts/${accountId}/messages/${msgId}/attachments/${attachId}/download`,
+      { responseType: 'blob' }),
 }

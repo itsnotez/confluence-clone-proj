@@ -3,6 +3,7 @@ package com.company.wiki.mail.service;
 import com.company.wiki.common.util.AesEncryptUtil;
 import com.company.wiki.mail.entity.MailAccount;
 import com.company.wiki.mail.entity.MailMessage;
+import com.company.wiki.mail.entity.MailMessageAttachment;
 import jakarta.mail.*;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeUtility;
@@ -31,13 +32,18 @@ public class ImapService {
     private final AesEncryptUtil aesEncryptUtil;
 
     /**
+     * ImapService가 반환하는 메시지+첨부파일 묶음
+     */
+    public record FetchedMessage(MailMessage message, List<MailMessageAttachment> attachments) {}
+
+    /**
      * 지정된 IMAP 계정에서 최근 maxFetch건의 메시지를 fetch한다.
      *
      * @param account  IMAP 계정 정보 (자격증명 암호화됨)
      * @param maxFetch 최대 가져올 메시지 수
-     * @return fetch된 MailMessage 목록 (DB 미저장 상태)
+     * @return fetch된 FetchedMessage 목록 (DB 미저장 상태)
      */
-    public List<MailMessage> fetchNewMessages(MailAccount account, int maxFetch) {
+    public List<FetchedMessage> fetchNewMessages(MailAccount account, int maxFetch) {
         String password = aesEncryptUtil.decrypt(account.getCredential());
 
         Properties props = new Properties();
@@ -79,7 +85,7 @@ public class ImapService {
             fp.add(UIDFolder.FetchProfileItem.UID);
             inbox.fetch(recent, fp);
 
-            List<MailMessage> result = new ArrayList<>();
+            List<FetchedMessage> result = new ArrayList<>();
             for (Message msg : recent) {
                 try {
                     String uid = String.valueOf(((UIDFolder) inbox).getUID(msg));
@@ -90,14 +96,17 @@ public class ImapService {
                             : LocalDateTime.now();
                     String body = extractTextFull(msg);
 
-                    result.add(MailMessage.builder()
+                    MailMessage mailMessage = MailMessage.builder()
                             .mailAccountId(account.getId())
                             .messageUid(uid)
                             .subject(subject)
                             .sender(from)
                             .receivedAt(received)
                             .bodyText(body)
-                            .build());
+                            .build();
+
+                    List<MailMessageAttachment> attachments = extractAttachments(msg);
+                    result.add(new FetchedMessage(mailMessage, attachments));
                 } catch (Exception e) {
                     log.warn("메시지 파싱 실패 (건너뜀): {} — {}", e.getClass().getSimpleName(), e.getMessage());
                 }
@@ -123,6 +132,57 @@ public class ImapService {
                 // 닫기 실패는 무시
             }
         }
+    }
+
+    /**
+     * 메시지에서 첨부파일을 추출한다.
+     */
+    private List<MailMessageAttachment> extractAttachments(Message msg) {
+        try {
+            return extractAttachmentsFromPart(msg);
+        } catch (Exception e) {
+            log.warn("첨부파일 추출 실패: {}", e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    private List<MailMessageAttachment> extractAttachmentsFromPart(Part part) {
+        List<MailMessageAttachment> result = new ArrayList<>();
+        try {
+            if (part.isMimeType("multipart/*")) {
+                Multipart mp = (Multipart) part.getContent();
+                for (int i = 0; i < mp.getCount(); i++) {
+                    BodyPart bp = mp.getBodyPart(i);
+                    result.addAll(extractAttachmentsFromPart(bp));
+                }
+            } else {
+                String disposition = part.getDisposition();
+                String fileName = part.getFileName();
+                // text/plain, text/html 파트는 건너뜀
+                if (part.isMimeType("text/plain") || part.isMimeType("text/html")) {
+                    return result;
+                }
+                if (Part.ATTACHMENT.equalsIgnoreCase(disposition) || fileName != null) {
+                    try {
+                        String decodedName = fileName != null ? MimeUtility.decodeText(fileName) : "attachment";
+                        byte[] data = part.getInputStream().readAllBytes();
+                        String contentType = part.getContentType();
+                        MailMessageAttachment attachment = MailMessageAttachment.builder()
+                                .fileName(decodedName)
+                                .contentType(contentType)
+                                .fileSize((long) data.length)
+                                .fileData(data)
+                                .build();
+                        result.add(attachment);
+                    } catch (Exception e) {
+                        log.warn("첨부파일 파트 처리 실패: {}", e.getMessage());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.warn("파트 처리 실패: {}", e.getMessage());
+        }
+        return result;
     }
 
     /**

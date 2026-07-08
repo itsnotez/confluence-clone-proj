@@ -60,6 +60,15 @@
             </div>
             <hr style="border:none;border-top:1px solid #e0e0e0;margin:12px 0" />
             <div class="preview-body">{{ mailStore.selectedMessage.bodyPreview }}</div>
+            <!-- 첨부파일 -->
+            <div v-if="attachments.length > 0" class="attachment-section">
+              <p class="attach-title">첨부파일 ({{ attachments.length }})</p>
+              <div v-for="att in attachments" :key="att.id" class="attach-item">
+                <span class="attach-name">📎 {{ att.fileName }}</span>
+                <span class="attach-size">{{ formatSize(att.fileSize) }}</span>
+                <button class="attach-download" @click="downloadAttachment(att)">다운로드</button>
+              </div>
+            </div>
             <hr style="border:none;border-top:1px solid #e0e0e0;margin:12px 0" />
             <div class="preview-actions">
               <DxButton
@@ -86,6 +95,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useMailStore } from '@/stores/mail'
 import { useSpaceStore } from '@/stores/space'
+import { mailMessageApi } from '@/api/mail'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import SpaceSidebar from '@/components/layout/SpaceSidebar.vue'
 import { DxDataGrid, DxColumn, DxPaging, DxSelection } from 'devextreme-vue/data-grid'
@@ -101,6 +111,7 @@ const spaceKey = computed(() => route.params.spaceKey)
 const selectedAccountId = ref(null)
 const showPreview = ref(false)
 const converting = ref(false)
+const attachments = ref([])
 
 onMounted(async () => {
   await mailStore.fetchAccounts(spaceKey.value)
@@ -119,6 +130,42 @@ watch(selectedAccountId, async (id) => {
 function onRowClick({ data }) {
   mailStore.selectMessage(data)
   showPreview.value = true
+  loadAttachments(data)
+}
+
+async function loadAttachments(msg) {
+  attachments.value = []
+  try {
+    const res = await mailMessageApi.getAttachments(spaceKey.value, selectedAccountId.value, msg.id)
+    attachments.value = res.data.data || []
+  } catch (e) {
+    attachments.value = []
+  }
+}
+
+async function downloadAttachment(att) {
+  try {
+    const res = await mailMessageApi.downloadAttachment(
+      spaceKey.value, selectedAccountId.value, mailStore.selectedMessage.id, att.id
+    )
+    const url = URL.createObjectURL(res.data)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = att.fileName
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  } catch (e) {
+    notify({ message: '다운로드 실패', type: 'error', displayTime: 2000 })
+  }
+}
+
+function formatSize(bytes) {
+  if (!bytes) return ''
+  if (bytes < 1024) return bytes + ' B'
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
 }
 
 function formatDate(dateStr) {
@@ -234,5 +281,46 @@ async function handleConvert(msg) {
 .status-converted {
   background: #e8f5e9;
   color: #2e7d32;
+}
+.attachment-section {
+  margin: 12px 0;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+.attach-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #555;
+  margin: 0 0 8px;
+}
+.attach-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  font-size: 13px;
+}
+.attach-name {
+  flex: 1;
+  color: #333;
+  word-break: break-all;
+}
+.attach-size {
+  color: #888;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.attach-download {
+  padding: 2px 10px;
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+.attach-download:hover {
+  background: #1565c0;
 }
 </style>

@@ -25,6 +25,7 @@ public class MailMessageDto {
         private String status;
         private Long linkedContentId;
         private LocalDateTime createdAt;
+        private boolean hasAttachment;
 
         public static Response from(MailMessage msg) {
             String preview = null;

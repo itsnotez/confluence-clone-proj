@@ -35,10 +35,14 @@
               height="calc(100vh - 220px)"
             >
               <DxSelection mode="single" />
+              <DxColumn caption="첨부" :width="50" alignment="center" cell-template="attachTemplate" />
               <DxColumn data-field="subject" caption="제목" />
               <DxColumn data-field="sender" caption="발신자" :width="200" />
               <DxColumn data-field="receivedAt" caption="수신일" data-type="datetime" :width="160" />
               <DxColumn data-field="status" caption="상태" :width="90" cell-template="statusTemplate" />
+              <template #attachTemplate="{ data }">
+                <span v-if="data.data.hasAttachment" title="첨부파일 있음" style="font-size:15px">📎</span>
+              </template>
               <template #statusTemplate="{ data }">
                 <span :class="['status-badge', data.value === 'CONVERTED' ? 'status-converted' : 'status-new']">
                   {{ data.value === 'CONVERTED' ? '변환됨' : '미변환' }}

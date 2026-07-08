@@ -62,7 +62,11 @@ public class MailMessageService {
 
         return mailMessageRepository.findByMailAccountIdOrderByReceivedAtDesc(accountId)
                 .stream()
-                .map(MailMessageDto.Response::from)
+                .map(msg -> {
+                    MailMessageDto.Response dto = MailMessageDto.Response.from(msg);
+                    dto.setHasAttachment(mailMessageAttachmentRepository.existsByMailMessageId(msg.getId()));
+                    return dto;
+                })
                 .toList();
     }
 

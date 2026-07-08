@@ -1,7 +1,10 @@
 package com.company.wiki.mail.service;
 
+import com.company.wiki.attachment.entity.Attachment;
+import com.company.wiki.attachment.repository.AttachmentRepository;
 import com.company.wiki.common.exception.BusinessException;
 import com.company.wiki.common.exception.ErrorCode;
+import com.company.wiki.common.service.StorageService;
 import com.company.wiki.content.entity.Content;
 import com.company.wiki.content.entity.ContentVersion;
 import com.company.wiki.content.repository.ContentRepository;
@@ -24,8 +27,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.ByteArrayInputStream;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @Transactional
@@ -41,6 +46,8 @@ public class MailMessageService {
     private final SpaceRepository spaceRepository;
     private final PermissionService permissionService;
     private final UserRepository userRepository;
+    private final AttachmentRepository attachmentRepository;
+    private final StorageService storageService;
 
     /**
      * 특정 메일 계정의 메시지 목록 조회 (최신순)
@@ -146,7 +153,30 @@ public class MailMessageService {
         msg.setStatus("CONVERTED");
         mailMessageRepository.save(msg);
 
-        log.info("메일 메시지 [{}] → 페이지 [{}] 변환 완료", msgId, content.getId());
+        // 메일 첨부파일 → 콘텐츠 첨부파일 복사
+        List<MailMessageAttachment> mailAttachments = mailMessageAttachmentRepository.findByMailMessageId(msgId);
+        int copiedCount = 0;
+        for (MailMessageAttachment mailAtt : mailAttachments) {
+            try {
+                String key = "contents/" + content.getId() + "/" + UUID.randomUUID() + "_" + mailAtt.getFileName();
+                long size = mailAtt.getFileSize() != null ? mailAtt.getFileSize() : mailAtt.getFileData().length;
+                storageService.upload(key, new ByteArrayInputStream(mailAtt.getFileData()), size, mailAtt.getContentType());
+                Attachment attachment = Attachment.builder()
+                        .contentId(content.getId())
+                        .fileName(mailAtt.getFileName())
+                        .storagePath(key)
+                        .mimeType(mailAtt.getContentType())
+                        .sizeBytes(size)
+                        .uploadedBy(userId)
+                        .build();
+                attachmentRepository.save(attachment);
+                copiedCount++;
+            } catch (Exception e) {
+                log.warn("첨부파일 복사 실패 [{}]: {}", mailAtt.getFileName(), e.getMessage());
+            }
+        }
+
+        log.info("메일 메시지 [{}] → 페이지 [{}] 변환 완료 (첨부파일 {}개 복사)", msgId, content.getId(), copiedCount);
 
         return new MailMessageDto.ConvertResponse(content.getId(), content.getTitle(), "메일이 페이지로 변환되었습니다");
     }

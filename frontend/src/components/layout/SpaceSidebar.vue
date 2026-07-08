@@ -4,11 +4,17 @@
       <RouterLink :to="`/spaces/${spaceKey}`" class="space-name-link">
         {{ spaceStore.currentSpace?.name || '스페이스' }}
       </RouterLink>
+      <button class="mailbox-btn" @click="goMailBox" title="메일함">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+          <rect x="1" y="3" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.3"/>
+          <path d="M1 5.5 L8 9.5 L15 5.5" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+        </svg>
+        메일함
+      </button>
     </div>
     <ContentTree :space-key="spaceKey" />
     <div class="sidebar-footer">
       <button class="new-page-btn" @click="goNewPage">+ 새 페이지 만들기</button>
-      <button class="mailbox-btn" @click="goMailBox">메일함</button>
     </div>
   </aside>
 </template>
@@ -48,19 +54,42 @@ function goMailBox() {
   height: calc(100vh - 56px);
 }
 .sidebar-header {
-  padding: 16px;
+  padding: 10px 12px;
   border-bottom: 1px solid #e0e0e0;
   background: #eeeeee;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 .space-name-link {
   font-weight: 600;
-  font-size: 15px;
+  font-size: 14px;
   color: #1565c0;
   text-decoration: none;
-  display: block;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .space-name-link:hover {
   text-decoration: underline;
+}
+.mailbox-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 9px;
+  background: #fff;
+  color: #1976d2;
+  border: 1px solid #1976d2;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.mailbox-btn:hover {
+  background: #e3f2fd;
 }
 .sidebar-footer {
   padding: 12px;
@@ -79,19 +108,5 @@ function goMailBox() {
 }
 .new-page-btn:hover {
   background: #1565c0;
-}
-.mailbox-btn {
-  width: 100%;
-  padding: 8px 12px;
-  background: #fff;
-  color: #1976d2;
-  border: 1px solid #1976d2;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 13px;
-  margin-top: 8px;
-}
-.mailbox-btn:hover {
-  background: #e3f2fd;
 }
 </style>

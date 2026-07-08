@@ -10,17 +10,19 @@ import java.util.List;
 public interface SearchRepository extends JpaRepository<Content, Long> {
 
     @Query(value = """
-            SELECT c.id, c.title, c.space_id AS spaceId, c.status,
+            SELECT c.id, c.title, c.space_id AS spaceId, s.space_key AS spaceKey, c.status,
                    c.updated_at AS updatedAt,
                    ts_rank(c.search_vector, websearch_to_tsquery('simple', :q)) AS rank
             FROM contents c
+            JOIN spaces s ON s.id = c.space_id
             WHERE c.deleted_at IS NULL
               AND c.search_vector @@ websearch_to_tsquery('simple', :q)
             UNION ALL
-            SELECT c.id, c.title, c.space_id, c.status, c.updated_at,
+            SELECT c.id, c.title, c.space_id, s.space_key, c.status, c.updated_at,
                    ts_rank(csb.search_vector, websearch_to_tsquery('simple', :q)) AS rank
             FROM content_search_bodies csb
             JOIN contents c ON csb.content_id = c.id
+            JOIN spaces s ON s.id = c.space_id
             WHERE c.deleted_at IS NULL
               AND csb.search_vector @@ websearch_to_tsquery('simple', :q)
             ORDER BY rank DESC LIMIT 50

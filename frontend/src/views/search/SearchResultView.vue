@@ -2,6 +2,9 @@
   <div class="search-page">
     <AppHeader />
     <main class="search-main">
+      <div class="search-nav">
+        <button class="back-btn" @click="router.back()">← 뒤로</button>
+      </div>
       <div v-if="searchStore.loading" class="loading-area">
         <DxLoadIndicator :visible="true" />
         <span>검색 중...</span>
@@ -54,7 +57,7 @@ watch(
 )
 
 function goToContent(item) {
-  router.push(`/spaces/${item.spaceId}/contents/${item.id}`)
+  router.push(`/spaces/${item.spaceKey}/contents/${item.id}`)
 }
 
 function formatDate(dateStr) {
@@ -81,6 +84,18 @@ function formatDate(dateStr) {
   overflow-y: auto;
   background: white;
 }
+.search-nav {
+  margin-bottom: 16px;
+}
+.back-btn {
+  background: none;
+  border: none;
+  color: #1976d2;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px 0;
+}
+.back-btn:hover { text-decoration: underline; }
 .loading-area {
   display: flex;
   align-items: center;

@@ -15,6 +15,7 @@ public class SearchDto {
         private Long id;
         private String title;
         private Long spaceId;
+        private String spaceKey;
         private String status;
         private LocalDateTime updatedAt;
         private Double rank;

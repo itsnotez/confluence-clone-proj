@@ -46,9 +46,10 @@ public class SearchService {
                     .id(id)
                     .title((String) row[1])
                     .spaceId(spaceId)
-                    .status((String) row[3])
-                    .updatedAt(row[4] != null ? ((Timestamp) row[4]).toLocalDateTime() : null)
-                    .rank(row[5] != null ? ((Number) row[5]).doubleValue() : 0.0)
+                    .spaceKey((String) row[3])
+                    .status((String) row[4])
+                    .updatedAt(row[5] != null ? ((Timestamp) row[5]).toLocalDateTime() : null)
+                    .rank(row[6] != null ? ((Number) row[6]).doubleValue() : 0.0)
                     .build();
             seen.put(id, resp);
         }

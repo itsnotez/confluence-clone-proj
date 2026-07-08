@@ -10,7 +10,8 @@
         </div>
         <div v-else-if="contentStore.currentContent" class="content-body">
           <div class="content-toolbar">
-            <div class="content-meta">
+            <button class="back-btn" @click="router.back()">← 뒤로</button>
+            <div class="content-meta" style="flex:1">
               <span class="content-status" :class="contentStore.currentContent.status?.toLowerCase()">
                 {{ contentStore.currentContent.status === 'PUBLISHED' ? '게시됨' : '임시저장' }}
               </span>
@@ -207,9 +208,19 @@ function formatDate(dateStr) {
 .content-toolbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 12px;
   margin-bottom: 16px;
 }
+.back-btn {
+  background: none;
+  border: none;
+  color: #1976d2;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px 0;
+  white-space: nowrap;
+}
+.back-btn:hover { text-decoration: underline; }
 .content-meta {
   display: flex;
   align-items: center;

@@ -30,6 +30,7 @@
                 @click="showVersionHistory = true"
               />
               <DxButton
+                v-if="canWrite"
                 text="편집"
                 type="default"
                 @click="goEdit"
@@ -86,6 +87,8 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useContentStore } from '@/stores/content'
+import { useSpaceStore } from '@/stores/space'
+import { useAuthStore } from '@/stores/auth'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import SpaceSidebar from '@/components/layout/SpaceSidebar.vue'
 import TipTapEditor from '@/components/content/TipTapEditor.vue'
@@ -100,6 +103,14 @@ import { labelApi } from '@/api/label'
 const route = useRoute()
 const router = useRouter()
 const contentStore = useContentStore()
+const spaceStore = useSpaceStore()
+const auth = useAuthStore()
+
+const canWrite = computed(() => {
+  if (auth.user?.role === 'SITE_ADMIN') return true
+  const p = spaceStore.mySpacePermission
+  return p === 'WRITE' || p === 'SPACE_ADMIN'
+})
 
 const spaceKey = route.params.spaceKey
 const contentId = computed(() => route.params.contentId)

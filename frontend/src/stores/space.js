@@ -6,6 +6,7 @@ export const useSpaceStore = defineStore('space', () => {
   const spaces = ref([])
   const currentSpace = ref(null)
   const contentTree = ref([])
+  const mySpacePermission = ref(null)
 
   async function fetchSpaces() {
     try {
@@ -20,6 +21,7 @@ export const useSpaceStore = defineStore('space', () => {
     try {
       const { data } = await spaceApi.getSpace(spaceKey)
       currentSpace.value = data.data
+      mySpacePermission.value = data.data?.myPermission ?? null
     } catch (err) {
       console.error('fetchSpace error:', err)
     }
@@ -61,6 +63,7 @@ export const useSpaceStore = defineStore('space', () => {
     spaces,
     currentSpace,
     contentTree,
+    mySpacePermission,
     fetchSpaces,
     fetchSpace,
     createSpace,

@@ -8,6 +8,7 @@ import com.company.wiki.space.entity.Space;
 import com.company.wiki.space.entity.SpaceFavorite;
 import com.company.wiki.space.entity.SpaceFavoriteId;
 import com.company.wiki.permission.repository.SpacePermissionRepository;
+import com.company.wiki.permission.service.PermissionService;
 import com.company.wiki.space.repository.SpaceFavoriteRepository;
 import com.company.wiki.space.repository.SpaceRepository;
 import com.company.wiki.user.entity.User;
@@ -34,6 +35,7 @@ public class SpaceService {
     private final UserRepository userRepository;
     private final AuditLogService auditLogService;
     private final SpacePermissionRepository spacePermissionRepository;
+    private final PermissionService permissionService;
 
     @Transactional(readOnly = true)
     public List<SpaceDto.Response> findAll(Long currentUserId) {
@@ -68,7 +70,12 @@ public class SpaceService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.SPACE_NOT_FOUND));
         boolean favorited = spaceFavoriteRepository.existsByIdSpaceIdAndIdUserId(
                 space.getId(), currentUserId);
-        return SpaceDto.Response.from(space, favorited);
+        User currentUser = userRepository.findById(currentUserId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        String myPermission = "SITE_ADMIN".equals(currentUser.getRole())
+                ? "SPACE_ADMIN"
+                : permissionService.resolveSpacePermission(space.getId(), currentUserId, List.of());
+        return SpaceDto.Response.from(space, favorited, myPermission);
     }
 
     public SpaceDto.Response create(SpaceDto.CreateRequest req, Long createdById) {

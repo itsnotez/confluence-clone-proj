@@ -34,7 +34,7 @@
               </h3>
               <div v-if="sortedTree.length === 0" class="empty-hint">
                 아직 페이지가 없습니다.
-                <RouterLink :to="`/spaces/${spaceKey}/contents/new`" class="empty-link">첫 페이지 만들기</RouterLink>
+                <RouterLink v-if="canWrite" :to="`/spaces/${spaceKey}/contents/new`" class="empty-link">첫 페이지 만들기</RouterLink>
               </div>
               <div v-else class="toc-tree">
                 <TocNode
@@ -101,6 +101,12 @@ const route = useRoute()
 const router = useRouter()
 const spaceStore = useSpaceStore()
 const auth = useAuthStore()
+
+const canWrite = computed(() => {
+  if (auth.user?.role === 'SITE_ADMIN') return true
+  const p = spaceStore.mySpacePermission
+  return p === 'WRITE' || p === 'SPACE_ADMIN'
+})
 
 const spaceKey = computed(() => route.params.spaceKey)
 

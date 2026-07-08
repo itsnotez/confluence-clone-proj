@@ -5,7 +5,7 @@
       :class="{ 'is-selected': isSelected }"
       :style="{ paddingLeft: (depth * 16 + 4) + 'px' }"
       @click="handleClick"
-      @contextmenu.prevent="showMenu"
+      @contextmenu.prevent="canWrite && showMenu($event)"
     >
       <!-- expand/collapse chevron -->
       <span
@@ -33,13 +33,13 @@
       <span class="node-title">{{ node.title || '(제목 없음)' }}</span>
 
       <!-- hover menu button -->
-      <span class="more-btn" @click.stop="showMenu($event)" title="더 보기">⋮</span>
+      <span v-if="canWrite" class="more-btn" @click.stop="showMenu($event)" title="더 보기">⋮</span>
     </div>
 
     <!-- context menu -->
     <Teleport to="body">
       <div
-        v-if="menuVisible"
+        v-if="menuVisible && canWrite"
         class="tree-context-menu"
         :style="{ top: menuY + 'px', left: menuX + 'px' }"
         @click.stop
@@ -70,12 +70,23 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { useSpaceStore } from '@/stores/space'
+import { useAuthStore } from '@/stores/auth'
 
 const props = defineProps({
   node: { type: Object, required: true },
   depth: { type: Number, default: 0 },
   selectedId: { type: [Number, String, null], default: null },
   spaceKey: { type: String, required: true }
+})
+
+const spaceStore = useSpaceStore()
+const auth = useAuthStore()
+
+const canWrite = computed(() => {
+  if (auth.user?.role === 'SITE_ADMIN') return true
+  const p = spaceStore.mySpacePermission
+  return p === 'WRITE' || p === 'SPACE_ADMIN'
 })
 
 const emit = defineEmits(['navigate', 'new-child', 'move', 'delete'])

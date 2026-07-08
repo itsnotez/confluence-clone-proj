@@ -13,15 +13,17 @@
       </button>
     </div>
     <ContentTree :space-key="spaceKey" />
-    <div class="sidebar-footer">
+    <div v-if="canWrite" class="sidebar-footer">
       <button class="new-page-btn" @click="goNewPage">+ 새 페이지 만들기</button>
     </div>
   </aside>
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { useRouter, RouterLink } from 'vue-router'
 import { useSpaceStore } from '@/stores/space'
+import { useAuthStore } from '@/stores/auth'
 import ContentTree from './ContentTree.vue'
 
 const props = defineProps({
@@ -33,6 +35,13 @@ const props = defineProps({
 
 const router = useRouter()
 const spaceStore = useSpaceStore()
+const auth = useAuthStore()
+
+const canWrite = computed(() => {
+  if (auth.user?.role === 'SITE_ADMIN') return true
+  const p = spaceStore.mySpacePermission
+  return p === 'WRITE' || p === 'SPACE_ADMIN'
+})
 
 function goNewPage() {
   router.push(`/spaces/${props.spaceKey}/contents/new`)

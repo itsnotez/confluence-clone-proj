@@ -64,8 +64,13 @@ public class SpaceDto {
         private UserSummary createdBy;
         private LocalDateTime createdAt;
         private boolean favorited;
+        private String myPermission;
 
         public static Response from(Space space, boolean favorited) {
+            return from(space, favorited, null);
+        }
+
+        public static Response from(Space space, boolean favorited, String myPermission) {
             UserSummary userSummary = null;
             if (space.getCreatedBy() != null) {
                 userSummary = UserSummary.builder()
@@ -85,6 +90,7 @@ public class SpaceDto {
                     .createdBy(userSummary)
                     .createdAt(space.getCreatedAt())
                     .favorited(favorited)
+                    .myPermission(myPermission)
                     .build();
         }
     }

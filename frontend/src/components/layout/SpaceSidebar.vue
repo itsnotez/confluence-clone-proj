@@ -1,7 +1,9 @@
 <template>
   <aside class="space-sidebar">
     <div class="sidebar-header">
-      <span class="space-name">{{ spaceStore.currentSpace?.name || '스페이스' }}</span>
+      <RouterLink :to="`/spaces/${spaceKey}`" class="space-name-link">
+        {{ spaceStore.currentSpace?.name || '스페이스' }}
+      </RouterLink>
     </div>
     <ContentTree :space-key="spaceKey" />
     <div class="sidebar-footer">
@@ -12,7 +14,7 @@
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router'
+import { useRouter, RouterLink } from 'vue-router'
 import { useSpaceStore } from '@/stores/space'
 import ContentTree from './ContentTree.vue'
 
@@ -50,10 +52,15 @@ function goMailBox() {
   border-bottom: 1px solid #e0e0e0;
   background: #eeeeee;
 }
-.space-name {
+.space-name-link {
   font-weight: 600;
   font-size: 15px;
-  color: #333;
+  color: #1565c0;
+  text-decoration: none;
+  display: block;
+}
+.space-name-link:hover {
+  text-decoration: underline;
 }
 .sidebar-footer {
   padding: 12px;

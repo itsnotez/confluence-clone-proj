@@ -210,7 +210,8 @@ watch(spaceKey, loadSpace)
 <style scoped>
 .space-home {
   min-height: 100vh;
-  background: #fff;
+  background: #FFFFFF;
+  font-family: var(--font-family, "Pretendard GOV", "Pretendard", sans-serif);
 }
 .space-body {
   display: flex;
@@ -218,19 +219,19 @@ watch(spaceKey, loadSpace)
 }
 .main-content {
   flex: 1;
-  padding: 28px 36px;
+  padding: 32px 36px;
   overflow-y: auto;
   min-width: 0;
 }
 .loading {
-  color: #888;
-  font-size: 14px;
+  color: #6D7882;
+  font-size: 15px;
   padding-top: 40px;
 }
 
 /* Header */
 .space-header {
-  border-bottom: 2px solid #e8eaf6;
+  border-bottom: 1px solid #E6E8EA;
   padding-bottom: 18px;
   margin-bottom: 24px;
 }
@@ -238,29 +239,34 @@ watch(spaceKey, loadSpace)
   display: flex;
   align-items: center;
   gap: 14px;
-  margin-bottom: 5px;
+  margin-bottom: 6px;
 }
 .space-title-row h2 {
   margin: 0;
   font-size: 24px;
   font-weight: 700;
-  color: #1a1a2e;
+  color: #1E2124;
 }
 .space-desc {
-  color: #666;
-  font-size: 14px;
+  color: #464C53;
+  font-size: 15px;
   margin: 0;
 }
 .perm-link {
-  font-size: 12px;
-  color: #1976d2;
+  font-size: 13px;
+  color: #256EF4;
   text-decoration: none;
-  border: 1px solid #1976d2;
-  padding: 3px 10px;
-  border-radius: 12px;
+  border: 1px solid #256EF4;
+  padding: 4px 12px;
+  border-radius: 6px;
   white-space: nowrap;
+  background: transparent;
 }
-.perm-link:hover { background: #e3f2fd; }
+.perm-link:hover {
+  background: #ECF2FE;
+  color: #0B50D0;
+  border-color: #0B50D0;
+}
 
 /* 2-column layout */
 .home-body {
@@ -272,42 +278,43 @@ watch(spaceKey, loadSpace)
 
 /* Section shared */
 .section-heading {
-  font-size: 15px;
-  font-weight: 600;
-  color: #444;
+  font-size: 17px;
+  font-weight: 700;
+  color: #1E2124;
   margin: 0 0 14px;
   display: flex;
   align-items: center;
 }
 .page-count {
   margin-left: auto;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 400;
-  color: #999;
-  background: #f0f0f0;
+  color: #6D7882;
+  background: #F4F5F6;
   padding: 2px 8px;
   border-radius: 10px;
 }
 .empty-hint {
-  font-size: 13px;
-  color: #aaa;
+  font-size: 15px;
+  color: #6D7882;
   padding: 16px 0;
 }
 .empty-link {
   margin-left: 6px;
-  color: #1976d2;
-  font-size: 13px;
+  color: #256EF4;
+  font-size: 15px;
 }
+.empty-link:hover { color: #0B50D0; }
 
 /* TOC */
 .toc-section {
   min-width: 0;
 }
 .toc-tree {
-  border: 1px solid #e8eaf6;
+  border: 1px solid #B1B8BE;
   border-radius: 8px;
   overflow: hidden;
-  background: #fafbff;
+  background: #FFFFFF;
 }
 
 /* Recent list */
@@ -315,26 +322,26 @@ watch(spaceKey, loadSpace)
   min-width: 0;
 }
 .recent-list {
-  border: 1px solid #e8eaf6;
+  border: 1px solid #B1B8BE;
   border-radius: 8px;
   overflow: hidden;
-  background: #fafbff;
+  background: #FFFFFF;
 }
 .recent-item {
   padding: 10px 14px;
-  border-bottom: 1px solid #eef0f8;
+  border-bottom: 1px solid #E6E8EA;
   cursor: pointer;
   transition: background 0.1s;
 }
 .recent-item:last-child { border-bottom: none; }
-.recent-item:hover { background: #eef2ff; }
+.recent-item:hover { background: #ECF2FE; }
 .recent-item-title {
   display: flex;
   align-items: flex-start;
   gap: 6px;
-  font-size: 13px;
-  color: #333;
-  font-weight: 500;
+  font-size: 15px;
+  color: #1E2124;
+  font-weight: 400;
   margin-bottom: 4px;
   overflow: hidden;
 }
@@ -343,17 +350,17 @@ watch(spaceKey, loadSpace)
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.recent-item:hover .recent-item-title span { color: #1976d2; }
+.recent-item:hover .recent-item-title span { color: #256EF4; }
 .recent-item-meta {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 11px;
-  color: #999;
+  font-size: 13px;
+  color: #6D7882;
 }
 .meta-author {
-  color: #777;
-  font-weight: 500;
+  color: #464C53;
+  font-weight: 400;
 }
 </style>
 
@@ -364,25 +371,26 @@ watch(spaceKey, loadSpace)
   display: flex;
   align-items: center;
   gap: 6px;
-  padding-top: 7px;
-  padding-bottom: 7px;
+  padding-top: 8px;
+  padding-bottom: 8px;
   padding-right: 16px;
   cursor: pointer;
-  font-size: 13px;
-  color: #333;
-  border-bottom: 1px solid #eef0f8;
+  font-size: 15px;
+  color: #1E2124;
+  border-bottom: 1px solid #E6E8EA;
   transition: background 0.1s;
+  font-family: "Pretendard GOV", "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
 }
-.toc-row:hover { background: #eef2ff; color: #1976d2; }
+.toc-row:hover { background: #ECF2FE; color: #256EF4; }
 .toc-row:hover .toc-page-icon rect,
-.toc-row:hover .toc-page-icon line { stroke: #1976d2; }
+.toc-row:hover .toc-page-icon line { stroke: #256EF4; }
 .toc-chevron {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 14px;
   flex-shrink: 0;
-  color: #888;
+  color: #6D7882;
 }
 .toc-page-icon { flex-shrink: 0; }
 .toc-title {

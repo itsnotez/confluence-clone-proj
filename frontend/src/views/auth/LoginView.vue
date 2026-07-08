@@ -60,25 +60,28 @@ async function handleLogin() {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: #f5f5f5;
+  background: #F4F5F6;
+  font-family: var(--font-family, "Pretendard GOV", "Pretendard", sans-serif);
 }
 .login-card {
-  background: white;
+  background: #FFFFFF;
   padding: 40px;
+  border: 1px solid #B1B8BE;
   border-radius: 8px;
-  width: 380px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+  width: 400px;
 }
 .login-title {
   text-align: center;
   margin-bottom: 32px;
-  font-size: 20px;
-  color: #333;
+  font-size: 24px;
+  font-weight: 700;
+  color: #1E2124;
+  line-height: 1.3;
 }
 .error-msg {
-  color: #e53e3e;
+  color: #DE3412;
   text-align: center;
   margin-top: 12px;
-  font-size: 14px;
+  font-size: 15px;
 }
 </style>

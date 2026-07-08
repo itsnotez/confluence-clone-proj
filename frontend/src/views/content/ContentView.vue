@@ -182,6 +182,7 @@ function formatDate(dateStr) {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  font-family: var(--font-family, "Pretendard GOV", "Pretendard", sans-serif);
 }
 .content-layout {
   display: flex;
@@ -192,14 +193,15 @@ function formatDate(dateStr) {
   flex: 1;
   overflow-y: auto;
   padding: 32px;
-  background: white;
+  background: #FFFFFF;
 }
 .loading-area {
   display: flex;
   align-items: center;
   gap: 12px;
-  color: #666;
+  color: #6D7882;
   margin-top: 60px;
+  font-size: 15px;
 }
 .content-body {
   max-width: 900px;
@@ -214,65 +216,68 @@ function formatDate(dateStr) {
 .back-btn {
   background: none;
   border: none;
-  color: #1976d2;
-  font-size: 14px;
+  color: #256EF4;
+  font-size: 15px;
   cursor: pointer;
   padding: 4px 0;
   white-space: nowrap;
+  font-family: var(--font-family, "Pretendard GOV", "Pretendard", sans-serif);
 }
-.back-btn:hover { text-decoration: underline; }
+.back-btn:hover { color: #0B50D0; text-decoration: underline; }
 .content-meta {
   display: flex;
   align-items: center;
   gap: 12px;
-  font-size: 13px;
-  color: #666;
+  font-size: 15px;
+  color: #6D7882;
 }
 .content-status {
-  padding: 2px 8px;
+  padding: 3px 10px;
   border-radius: 12px;
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 400;
 }
 .content-status.published {
-  background: #e8f5e9;
-  color: #2e7d32;
+  background: #e6f4ea;
+  color: #228738;
+  border: 1px solid #b7dfbf;
 }
 .content-status.draft {
   background: #fff8e1;
-  color: #f57f17;
+  color: #a07000;
+  border: 1px solid #ffe082;
 }
 .content-actions {
   display: flex;
   gap: 8px;
 }
 .content-title {
-  font-size: 2em;
+  font-size: 24px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: #1E2124;
   margin: 0 0 24px 0;
   line-height: 1.3;
 }
 .empty-state {
   text-align: center;
-  color: #999;
+  color: #6D7882;
   margin-top: 80px;
   font-size: 15px;
 }
 .label-panel {
   margin-top: 24px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid #E6E8EA;
   padding-top: 16px;
 }
 .label-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: #444;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1E2124;
   margin: 0 0 8px 0;
 }
 .label-empty {
-  font-size: 13px;
-  color: #aaa;
+  font-size: 15px;
+  color: #6D7882;
   margin-bottom: 12px;
 }
 .label-chips {
@@ -285,24 +290,25 @@ function formatDate(dateStr) {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 2px 10px;
+  padding: 3px 10px;
   border-radius: 12px;
-  background: #eef2ff;
-  border: 1px solid #c7d2fe;
+  background: #ECF2FE;
+  border: 1px solid #256EF4;
   font-size: 13px;
-  color: #3730a3;
+  color: #0B50D0;
 }
 .chip-remove {
   cursor: pointer;
-  color: #888;
+  color: #6D7882;
   background: none;
   border: none;
   font-size: 14px;
   line-height: 1;
   padding: 0 0 0 2px;
+  font-family: var(--font-family, "Pretendard GOV", "Pretendard", sans-serif);
 }
 .chip-remove:hover {
-  color: #e53e3e;
+  color: #DE3412;
 }
 .label-add {
   display: flex;

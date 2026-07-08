@@ -156,10 +156,11 @@ function closeDialog() {
 <style scoped>
 .space-list-page {
   min-height: 100vh;
-  background: #fafafa;
+  background: #F4F5F6;
+  font-family: var(--font-family, "Pretendard GOV", "Pretendard", sans-serif);
 }
 .page-content {
-  padding: 24px;
+  padding: 32px;
   max-width: 1100px;
   margin: 0 auto;
 }
@@ -167,12 +168,13 @@ function closeDialog() {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 .page-header h2 {
   margin: 0;
-  font-size: 22px;
-  color: #333;
+  font-size: 24px;
+  font-weight: 700;
+  color: #1E2124;
 }
 .dialog-body {
   padding: 16px;
@@ -186,17 +188,25 @@ function closeDialog() {
 
 :deep(.dx-datagrid .dx-row) {
   cursor: pointer;
+  font-family: var(--font-family, "Pretendard GOV", "Pretendard", sans-serif);
+  font-size: 15px;
+  color: #1E2124;
 }
 :deep(.dx-datagrid .dx-state-hover td) {
-  background-color: #e8f0fe !important;
-  color: #1a237e;
+  background-color: #ECF2FE !important;
+  color: #0B50D0;
 }
 :deep(.dx-datagrid .dx-selection td),
 :deep(.dx-datagrid .dx-selection.dx-row:not(.dx-row-lines) td) {
-  background-color: #1976d2 !important;
+  background-color: #256EF4 !important;
   color: #fff !important;
 }
 :deep(.dx-datagrid .dx-selection td .dx-button-text) {
   color: #fff;
+}
+:deep(.dx-datagrid-headers .dx-datagrid-text-content) {
+  font-weight: 700;
+  color: #1E2124;
+  font-size: 15px;
 }
 </style>

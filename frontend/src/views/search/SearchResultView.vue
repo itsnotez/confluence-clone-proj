@@ -77,12 +77,13 @@ function formatDate(dateStr) {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  font-family: var(--font-family, "Pretendard GOV", "Pretendard", sans-serif);
 }
 .search-main {
   flex: 1;
   padding: 32px;
   overflow-y: auto;
-  background: white;
+  background: #FFFFFF;
 }
 .search-nav {
   margin-bottom: 16px;
@@ -90,33 +91,35 @@ function formatDate(dateStr) {
 .back-btn {
   background: none;
   border: none;
-  color: #1976d2;
-  font-size: 14px;
+  color: #256EF4;
+  font-size: 15px;
   cursor: pointer;
   padding: 4px 0;
+  font-family: var(--font-family, "Pretendard GOV", "Pretendard", sans-serif);
 }
-.back-btn:hover { text-decoration: underline; }
+.back-btn:hover { color: #0B50D0; text-decoration: underline; }
 .loading-area {
   display: flex;
   align-items: center;
   gap: 12px;
-  color: #666;
+  color: #6D7882;
   margin-top: 60px;
+  font-size: 15px;
 }
 .search-heading {
-  font-size: 1.4em;
-  font-weight: 600;
-  color: #1a1a1a;
+  font-size: 24px;
+  font-weight: 700;
+  color: #1E2124;
   margin: 0 0 4px 0;
 }
 .result-count {
-  font-size: 13px;
-  color: #888;
-  margin: 0 0 20px 0;
+  font-size: 15px;
+  color: #6D7882;
+  margin: 0 0 24px 0;
 }
 .empty-state {
   text-align: center;
-  color: #999;
+  color: #6D7882;
   margin-top: 60px;
   font-size: 15px;
 }
@@ -127,42 +130,47 @@ function formatDate(dateStr) {
   max-width: 800px;
 }
 .search-item {
-  padding: 14px 12px;
-  border-bottom: 1px solid #eee;
+  padding: 16px 12px;
+  border-bottom: 1px solid #E6E8EA;
   cursor: pointer;
   transition: background 0.15s;
 }
 .search-item:hover {
-  background: #f5f7ff;
+  background: #ECF2FE;
 }
 .item-title {
-  font-size: 15px;
-  font-weight: 500;
-  color: #1976d2;
+  font-size: 17px;
+  font-weight: 700;
+  color: #256EF4;
   margin-bottom: 6px;
+}
+.search-item:hover .item-title {
+  color: #0B50D0;
 }
 .item-meta {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 12px;
-  color: #888;
+  font-size: 13px;
+  color: #6D7882;
 }
 .status-badge {
-  padding: 2px 8px;
+  padding: 3px 10px;
   border-radius: 10px;
-  font-size: 11px;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 400;
 }
 .status-badge.published {
-  background: #e8f5e9;
-  color: #2e7d32;
+  background: #e6f4ea;
+  color: #228738;
+  border: 1px solid #b7dfbf;
 }
 .status-badge.draft {
   background: #fff8e1;
-  color: #f57f17;
+  color: #a07000;
+  border: 1px solid #ffe082;
 }
 .item-date {
-  color: #aaa;
+  color: #6D7882;
 }
 </style>

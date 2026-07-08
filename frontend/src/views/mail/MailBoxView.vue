@@ -41,7 +41,9 @@
               <DxColumn data-field="receivedAt" caption="수신일" data-type="datetime" :width="160" />
               <DxColumn data-field="status" caption="상태" :width="90" cell-template="statusTemplate" />
               <template #attachTemplate="{ data }">
-                <span v-if="data.data.hasAttachment" title="첨부파일 있음" style="font-size:15px">📎</span>
+                <span v-if="data.data.hasAttachment" title="첨부파일 있음" style="display:inline-flex;align-items:center;color:#464C53">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </span>
               </template>
               <template #statusTemplate="{ data }">
                 <span :class="['status-badge', data.value === 'CONVERTED' ? 'status-converted' : 'status-new']">
@@ -68,7 +70,8 @@
             <div v-if="attachments.length > 0" class="attachment-section">
               <p class="attach-title">첨부파일 ({{ attachments.length }})</p>
               <div v-for="att in attachments" :key="att.id" class="attach-item">
-                <span class="attach-name">📎 {{ att.fileName }}</span>
+                <span class="attach-name">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;vertical-align:-2px;margin-right:4px"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>{{ att.fileName }}</span>
                 <span class="attach-size">{{ formatSize(att.fileSize) }}</span>
                 <button class="attach-download" @click="downloadAttachment(att)">다운로드</button>
               </div>
@@ -195,7 +198,8 @@ async function handleConvert(msg) {
 <style scoped>
 .mailbox-page {
   min-height: 100vh;
-  background: #fafafa;
+  background: #F4F5F6;
+  font-family: var(--font-family, "Pretendard GOV", "Pretendard", sans-serif);
 }
 .mailbox-body {
   display: flex;
@@ -204,7 +208,7 @@ async function handleConvert(msg) {
 .mailbox-content {
   flex: 1;
   overflow: hidden;
-  padding: 20px;
+  padding: 24px;
 }
 .mailbox-container {
   display: flex;
@@ -225,18 +229,19 @@ async function handleConvert(msg) {
 }
 .panel-header h2 {
   margin: 0;
-  font-size: 20px;
-  color: #333;
+  font-size: 24px;
+  font-weight: 700;
+  color: #1E2124;
   white-space: nowrap;
 }
 .preview-panel {
   width: 400px;
   min-width: 360px;
-  border: 1px solid #ddd;
+  border: 1px solid #B1B8BE;
   border-radius: 8px;
   padding: 16px;
   overflow-y: auto;
-  background: #fff;
+  background: #FFFFFF;
 }
 .preview-header {
   display: flex;
@@ -246,20 +251,22 @@ async function handleConvert(msg) {
 }
 .preview-title {
   margin: 0;
-  font-size: 15px;
+  font-size: 17px;
+  font-weight: 700;
   line-height: 1.4;
   flex: 1;
   word-break: break-all;
+  color: #1E2124;
 }
 .preview-meta p {
   margin: 4px 0;
-  font-size: 12px;
-  color: #666;
+  font-size: 13px;
+  color: #6D7882;
 }
 .preview-body {
-  font-size: 13px;
+  font-size: 15px;
   white-space: pre-wrap;
-  color: #444;
+  color: #464C53;
   max-height: 300px;
   overflow-y: auto;
 }
@@ -267,35 +274,36 @@ async function handleConvert(msg) {
   margin-top: 12px;
 }
 .converted-notice {
-  color: #2e7d32;
-  font-size: 13px;
+  color: #228738;
+  font-size: 15px;
   margin: 0;
 }
 .status-badge {
   display: inline-block;
-  padding: 2px 8px;
+  padding: 3px 10px;
   border-radius: 10px;
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 400;
 }
 .status-new {
-  background: #e3f2fd;
-  color: #1565c0;
+  background: #ECF2FE;
+  color: #0B50D0;
 }
 .status-converted {
-  background: #e8f5e9;
-  color: #2e7d32;
+  background: #e6f4ea;
+  color: #228738;
 }
 .attachment-section {
   margin: 12px 0;
-  padding: 10px;
-  background: #f8f9fa;
+  padding: 12px;
+  background: #F4F5F6;
+  border: 1px solid #B1B8BE;
   border-radius: 6px;
 }
 .attach-title {
-  font-size: 12px;
-  font-weight: 600;
-  color: #555;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1E2124;
   margin: 0 0 8px;
 }
 .attach-item {
@@ -303,28 +311,31 @@ async function handleConvert(msg) {
   align-items: center;
   gap: 8px;
   padding: 4px 0;
-  font-size: 13px;
+  font-size: 15px;
 }
 .attach-name {
   flex: 1;
-  color: #333;
+  color: #1E2124;
   word-break: break-all;
+  display: flex;
+  align-items: center;
 }
 .attach-size {
-  color: #888;
-  font-size: 11px;
+  color: #6D7882;
+  font-size: 13px;
   white-space: nowrap;
 }
 .attach-download {
-  padding: 2px 10px;
-  background: #1976d2;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
+  padding: 5px 12px;
+  background: transparent;
+  color: #1E2124;
+  border: 1px solid #58616A;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 13px;
+  font-family: var(--font-family, "Pretendard GOV", "Pretendard", sans-serif);
 }
 .attach-download:hover {
-  background: #1565c0;
+  background: #F4F5F6;
 }
 </style>

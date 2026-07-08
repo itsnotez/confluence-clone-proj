@@ -47,24 +47,25 @@ function goMailBox() {
 .space-sidebar {
   width: 250px;
   min-width: 250px;
-  background: #f5f5f5;
-  border-right: 1px solid #e0e0e0;
+  background: #FFFFFF;
+  border-right: 1px solid #E6E8EA;
   display: flex;
   flex-direction: column;
   height: calc(100vh - 56px);
+  font-family: var(--font-family, "Pretendard GOV", "Pretendard", sans-serif);
 }
 .sidebar-header {
   padding: 10px 12px;
-  border-bottom: 1px solid #e0e0e0;
-  background: #eeeeee;
+  border-bottom: 1px solid #E6E8EA;
+  background: #F4F5F6;
   display: flex;
   align-items: center;
   gap: 8px;
 }
 .space-name-link {
-  font-weight: 600;
-  font-size: 14px;
-  color: #1565c0;
+  font-weight: 700;
+  font-size: 15px;
+  color: #1E2124;
   text-decoration: none;
   flex: 1;
   overflow: hidden;
@@ -72,41 +73,45 @@ function goMailBox() {
   white-space: nowrap;
 }
 .space-name-link:hover {
-  text-decoration: underline;
+  color: #256EF4;
 }
 .mailbox-btn {
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 4px 9px;
-  background: #fff;
-  color: #1976d2;
-  border: 1px solid #1976d2;
-  border-radius: 4px;
+  padding: 5px 10px;
+  background: transparent;
+  color: #1E2124;
+  border: 1px solid #58616A;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 13px;
   white-space: nowrap;
   flex-shrink: 0;
+  font-family: var(--font-family, "Pretendard GOV", "Pretendard", sans-serif);
 }
 .mailbox-btn:hover {
-  background: #e3f2fd;
+  background: #F4F5F6;
 }
 .sidebar-footer {
   padding: 12px;
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid #E6E8EA;
   margin-top: auto;
 }
 .new-page-btn {
   width: 100%;
-  padding: 8px 12px;
-  background: #1976d2;
+  padding: 10px 12px;
+  background: #256EF4;
   color: white;
-  border: none;
-  border-radius: 4px;
+  border: 1px solid #256EF4;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 15px;
+  font-weight: 400;
+  font-family: var(--font-family, "Pretendard GOV", "Pretendard", sans-serif);
 }
 .new-page-btn:hover {
-  background: #1565c0;
+  background: #0B50D0;
+  border-color: #0B50D0;
 }
 </style>
